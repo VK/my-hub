@@ -1,0 +1,64 @@
+version: "3.2"
+
+services:
+
+  tf-airflow-hub:
+    image: vikru/my-hub
+    restart: always
+    ports:
+      - 8888:8000
+    environment:      
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://airflow:airflow@postgres:5432/hub1
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock
+    secrets:
+      - source: server.crt
+        target: /cer.pem
+      - source: server.key
+        target: /key.pem
+      - source: hub.cfg
+        target: /defaults.cfg
+    depends_on:
+      - "postgres"
+
+
+
+  postgres:
+    image: postgres:9.6
+    environment:
+        - POSTGRES_USER=airflow
+        - POSTGRES_PASSWORD=airflow
+        - POSTGRES_DB=airflow
+        - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+        - pgdata:/var/lib/postgresql/data/pgdata
+
+  mongo:
+    image: mongo
+    restart: always
+    volumes:
+        - mongodb:/data/db
+        - mongodb_config:/data/configdb
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    depends_on:
+      - "mongo"
+    environment:
+      - ME_CONFIG_SITE_BASEURL=/user/viktor/mongo
+
+
+
+secrets:
+  server.crt:
+      file: ./server.crt
+  server.key:
+      file: ./server.key
+  hub.cfg:
+    file: ./hub.cfg
+
+volumes:
+  mongodb:
+  mongodb_config:
+  pgdata:

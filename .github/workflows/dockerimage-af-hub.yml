@@ -1,0 +1,25 @@
+name: Docker Image af-hub
+
+on:
+  push:
+    branches: [ master ]
+  schedule:
+    - cron: '0 3 4,18 * *'
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Publish to Registry
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: dashpool/af-hub
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        cache: ${{ github.event_name != 'schedule' }}
+        dockerfile: core-container/Dockerfile  
+        snapshot: true

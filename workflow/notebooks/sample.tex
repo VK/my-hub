@@ -1,0 +1,39 @@
+\documentclass[a4paper,12pt,oneside]{article}
+\usepackage[DIV=14,BCOR=2mm,headinclude=true,footinclude=false]{typearea}
+
+\usepackage{xcolor}
+\definecolor{MySectionColor}{HTML}{46555f}
+\usepackage{fontspec}
+\usepackage{titlesec}
+\setmainfont{Minion Pro}
+\setsansfont{Myriad Pro}
+\newfontfamily\secfont{Myriad Pro}
+
+\newcommand{\secstyle}{\secfont\bfseries\color{MySectionColor}}
+  
+\titleformat*{\section}{\LARGE\secstyle}
+\titleformat*{\subsection}{\Large\secstyle}
+\titleformat*{\subsubsection}{\large\secstyle}
+
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[font={small,sf,bf},textfont={sf,md}]{caption}
+
+
+\begin{document}
+
+\section{A}
+Test
+
+\subsection{B}
+$$
+P_i \rightarrow P_i -1
+$$
+
+
+\subsubsection{C}
+Test 2
+
+
+\end{document}

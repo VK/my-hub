@@ -1,0 +1,24 @@
+
+[OAuthenticator]
+callback_url = https://localhost:9950/hub/oauth_callback
+client_id = ???
+client_secret = ???
+
+[ConfigurableHTTPProxy]
+auth_token = ???
+
+
+[Authenticator]
+users = ["???"]
+admins = ["???"]
+
+[Airflow]
+smtp = ???
+fromMail = ???@???.??
+toMail = ???@???.??
+
+
+[Databricks]
+TOKEN = 
+REGISTRY = 
+USER = 
