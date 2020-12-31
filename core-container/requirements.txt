@@ -31,6 +31,3 @@ pyarrow
 xlwt
 graphviz
 psutil
-apache-airflow
-flask_bcrypt
-dtale

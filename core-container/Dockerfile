@@ -111,6 +111,8 @@ RUN npm install \
    && npm run build \
    && jupyter labextension install
 
+#install airflow
+RUN pip install apache-airflow flask_bcrypt dtale
 
 #init airflow configuration as user
 RUN mkdir -p /home/admin/airflow/
