@@ -1,4 +1,4 @@
-name: Docker Image af-hub
+name: Create Docker Image
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
-        name: dashpool/af-hub
+        name: dashpool/my-hub
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         cache: ${{ github.event_name != 'schedule' }}
