@@ -86,7 +86,7 @@ RUN chmod 777 /run.sh
 # install other stuff
 COPY ./xtensions /xtensions
 RUN chown -R admin:admin /xtensions
-WORKDIR /xtensions/python_admin
+WORKDIR /xtensions/python_af-hub
 RUN python setup.py build && python setup.py install
 
 
