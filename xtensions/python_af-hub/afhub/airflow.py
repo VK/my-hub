@@ -64,14 +64,14 @@ class PapermillOperator(BaseOperator):
         self.dagfolder = context['dag'].folder
 
         outputFileName = os.path.join(
-            "/home/af-hub/workflow/output", self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
+            "/home/admin/workflow/output", self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
         workingDir = os.path.dirname(outputFileName)
 
         self.parameters["workflow"] = json.dumps({
-            "dagBase": "/home/af-hub/workflow/dags",
+            "dagBase": "/home/admin/workflow/dags",
             "dagFolder": self.dagfolder,
             "workingDir": workingDir,
-            "fileStore": "/home/af-hub/workflow/FileStore"
+            "fileStore": "/home/admin/workflow/FileStore"
         })
 
         return_value = self.execute_callable()
@@ -80,7 +80,7 @@ class PapermillOperator(BaseOperator):
 
     def execute_callable(self):
         outputFileName = os.path.join(
-            "/home/af-hub/workflow/output", self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
+            "/home/admin/workflow/output", self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
         workingDir = os.path.dirname(outputFileName)
 
         res = {}
@@ -91,7 +91,7 @@ class PapermillOperator(BaseOperator):
         try:
             res = pm.execute_notebook(
                 os.path.join(self.dagfolder, self.inputFile),
-                os.path.join("/home/af-hub/workflow/output",
+                os.path.join("/home/admin/workflow/output",
                              self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile),
                 cwd=workingDir,
                 parameters=self.parameters
@@ -197,7 +197,7 @@ class LibraryOperator(BaseOperator):
         # create the output of the local library copy
         self.runDate = context['execution_date']
         outputFolder = os.path.join(
-            "/home/af-hub/workflow/output", self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFolder, self.libName)
+            "/home/admin/workflow/output", self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFolder, self.libName)
 
         if not os.path.isdir(outputFolder):
             os.makedirs(outputFolder)
@@ -226,12 +226,12 @@ class LibraryOperator(BaseOperator):
             raise Exception("library build process failed")
 
         # copy the library package to the local FileStore
-        if not os.path.isdir("/home/af-hub/workflow/FileStore/libs"):
-            os.makedirs("/home/af-hub/workflow/FileStore/libs")
+        if not os.path.isdir("/home/admin/workflow/FileStore/libs"):
+            os.makedirs("/home/admin/workflow/FileStore/libs")
         createdWhlFile = os.listdir(os.path.join(tempdir.name, "dist"))[0]
         from shutil import copyfile
         copyfile(os.path.join(tempdir.name, "dist", createdWhlFile), os.path.join(
-            "/home/af-hub/workflow/FileStore/libs", self.whlfile))
+            "/home/admin/workflow/FileStore/libs", self.whlfile))
 
         # sync library file to databricks
         if self.to_databricks:
@@ -241,7 +241,7 @@ class LibraryOperator(BaseOperator):
         # append to libs log
         with open(
                 os.path.join(
-                    "/home/af-hub/workflow/output",
+                    "/home/admin/workflow/output",
                     self.runDate.strftime("%Y-%m-%d_%H_%M"),
                     self.outputFolder,
                     "LibraryOperator"),
@@ -326,7 +326,7 @@ class DatabricksOperator(BaseOperator):
         self.dagfolder = context['dag'].folder
 
         outputFileName = os.path.join(
-            "/home/af-hub/workflow/output", self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
+            "/home/admin/workflow/output", self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
         workingDir = os.path.dirname(outputFileName)
 
         dbr = databricks.Databricks()
@@ -344,7 +344,7 @@ class DatabricksOperator(BaseOperator):
 
     def execute_callable(self):
         outputFileName = os.path.join(
-            "/home/af-hub/workflow/output", self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
+            "/home/admin/workflow/output", self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
         workingDir = os.path.dirname(outputFileName)
         fileName = outputFileName[len(workingDir)+1:]
 

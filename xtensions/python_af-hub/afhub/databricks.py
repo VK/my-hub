@@ -123,7 +123,7 @@ class Databricks:
 
         if not targetFile:
             checkLocalFile = os.path.join(
-                "/home/af-hub/workflow/FileStore", localFile)
+                "/home/admin/workflow/FileStore", localFile)
             if os.path.isfile(checkLocalFile):
                 targetFile = localFile
                 localFile = checkLocalFile
@@ -195,7 +195,7 @@ class Databricks:
         # if targetFile is empty, copy the file into the local FileStore
         if not targetFile:
             targetFile = os.path.join(
-                "/home/af-hub/workflow/FileStore", remoteFile)
+                "/home/admin/workflow/FileStore", remoteFile)
             targetDir = os.path.dirname(targetFile)
             # create folder if needed
             if not os.path.isdir(targetDir):
