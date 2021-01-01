@@ -2,7 +2,7 @@ version: "3.2"
 
 services:
 
-  tf-airflow-hub:
+  my-hub:
     image: vikru/my-hub
     restart: always
     ports:
@@ -25,6 +25,7 @@ services:
 
   postgres:
     image: postgres:9.6
+    restart: always    
     environment:
         - POSTGRES_USER=airflow
         - POSTGRES_PASSWORD=airflow

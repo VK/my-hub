@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.3.1-gpu-jupyter
+FROM tensorflow/tensorflow:2.2.1-gpu-jupyter
 
 #install nodejs
 RUN apt-get update \
