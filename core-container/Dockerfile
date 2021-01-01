@@ -63,7 +63,7 @@ COPY ./core-container/jupyterhub_config.py /jupyterhub_config.py
 
 
 #create guest user
-#RUN useradd -m guest -p guest -s /bin/bash -u 1111 --gid admin
+RUN useradd -m guest -p guest -s /bin/bash -u 1111 --gid admin
 
 #set root password
 RUN echo 'root:root' | chpasswd
