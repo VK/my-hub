@@ -114,7 +114,8 @@ COPY ./core-container/guest-jupyterlab-proxy-gui-config.json /home/guest/.jupyte
 
 
 #init tensorboard for users
-RUN jupyter tensorboard enable --user
+RUN jupyter tensorboard enable --user \
+    && pip install tensorboard==2.2.0
 
 
 ENTRYPOINT ["/run.sh"]
