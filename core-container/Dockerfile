@@ -102,12 +102,6 @@ RUN apt-get install sudo && pip install sudospawner && cat /sudoers_addon >> /et
 #run container as admin
 USER admin
 
-# add custom extensions as user
-WORKDIR /xtensions/jupyterlab_af-hub
-RUN npm install \
-   && npm run build \
-   && jupyter labextension install
-
 #install airflow
 RUN pip install apache-airflow flask_bcrypt dtale
 
