@@ -47,7 +47,7 @@ services:
     depends_on:
       - "mongo"
     environment:
-      - ME_CONFIG_SITE_BASEURL=/user/viktor/mongo
+      - ME_CONFIG_SITE_BASEURL=/user/admin/mongo
 
 
 
