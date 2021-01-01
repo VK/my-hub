@@ -16,7 +16,7 @@ RUN pip install -r /requirements.txt
 
 
 #install jupyterhub
-RUN pip install jupyterlab jupyterhub \
+RUN pip install jupyterlab==2.2.9 jupyterhub \
     && npm install -g configurable-http-proxy \
     && pip install oauthenticator PyJWT
 
