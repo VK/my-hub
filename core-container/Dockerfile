@@ -74,9 +74,6 @@ COPY ./core-container/run.sh /run.sh
 
 
 
-#copy the proxy route setting script
-COPY ./core-container/setup_routes.py /setup_routes.py
-
 #admin will can the owner of jupyter to install addons as user
 RUN chown -R admin:admin /usr/local/share/jupyter
 
