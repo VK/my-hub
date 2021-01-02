@@ -68,15 +68,11 @@ RUN useradd -m guest -p guest -s /bin/bash -u 1111 --gid admin
 #set root password
 RUN echo 'root:root' | chpasswd
 
-#create startup scripts
-COPY ./core-container/run.sh /run.sh 
-
-
-
-
 #admin will can the owner of jupyter to install addons as user
 RUN chown -R admin:admin /usr/local/share/jupyter
 
+#create startup scripts
+COPY ./core-container/run.sh /run.sh 
 
 
 #make executable
@@ -99,11 +95,15 @@ RUN ln -s /home/admin/workflow /home/guest/
 COPY ./core-container/sudoers_addon /sudoers_addon
 RUN apt-get install sudo && pip install sudospawner && cat /sudoers_addon >> /etc/sudoers
 
-#run container as admin
-USER admin
+#install supervisord
+RUN apt -y install supervisor
+COPY ./core-container/supervisord.conf /etc/supervisor/supervisord.conf
 
 #install airflow
 RUN pip install apache-airflow flask_bcrypt dtale
+
+#run container as admin
+USER admin
 
 #init airflow configuration as user
 RUN mkdir -p /home/admin/airflow/
@@ -116,6 +116,8 @@ COPY ./core-container/guest-jupyterlab-proxy-gui-config.json /home/guest/.jupyte
 #init tensorboard for users
 RUN jupyter tensorboard enable --user \
     && pip install tensorboard==2.2.0
+
+
 
 
 ENTRYPOINT ["/run.sh"]

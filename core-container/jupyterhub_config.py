@@ -1,7 +1,6 @@
 import os
 from os import path
-from oauthenticator.github import LocalGitHubOAuthenticator
-c.JupyterHub.authenticator_class = LocalGitHubOAuthenticator
+
 
 c.Application.log_level = 'DEBUG'
 
@@ -11,9 +10,26 @@ import json
 config = configparser.ConfigParser()
 config.read('/defaults.cfg')
 
-c.LocalGitHubOAuthenticator.oauth_callback_url = config["OAuthenticator"]["callback_url"]
-c.LocalGitHubOAuthenticator.client_id = config["OAuthenticator"]["client_id"]
-c.LocalGitHubOAuthenticator.client_secret = config["OAuthenticator"]["client_secret"]
+
+if config.has_section("LocalGitHubOAuthenticator"):
+
+    from oauthenticator.github import LocalGitHubOAuthenticator
+    c.JupyterHub.authenticator_class = LocalGitHubOAuthenticator
+
+    c.LocalGitHubOAuthenticator.oauth_callback_url = config["LocalGitHubOAuthenticator"]["callback_url"]
+    c.LocalGitHubOAuthenticator.client_id = config["LocalGitHubOAuthenticator"]["client_id"]
+    c.LocalGitHubOAuthenticator.client_secret = config["LocalGitHubOAuthenticator"]["client_secret"]
+
+
+if config.has_section("AzureAdOAuthenticator"):
+
+    from oauthenticator.azuread import AzureAdOAuthenticator
+    c.JupyterHub.authenticator_class = AzureAdOAuthenticator
+
+    c.AzureAdOAuthenticator.tenant_id = config["AzureAdOAuthenticator"]["tenant_id"]
+    c.AzureAdOAuthenticator.oauth_callback_url = config["AzureAdOAuthenticator"]["callback_url"]
+    c.AzureAdOAuthenticator.client_id = config["AzureAdOAuthenticator"]["client_id"]
+    c.AzureAdOAuthenticator.client_secret = config["AzureAdOAuthenticator"]["client_secret"]
 
 
 c.ConfigurableHTTPProxy.auth_token = config["ConfigurableHTTPProxy"]["auth_token"]

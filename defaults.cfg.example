@@ -1,8 +1,15 @@
 
-[OAuthenticator]
+[LocalGitHubOAuthenticator]
 callback_url = https://localhost:9950/hub/oauth_callback
 client_id = ???
 client_secret = ???
+
+#or
+# [AzureAdOAuthenticator]
+# tenant_id = ???
+# callback_url = https://localhost:9950/hub/oauth_callback
+# client_id = ???
+# client_secret = ???'
 
 [ConfigurableHTTPProxy]
 auth_token = ???
