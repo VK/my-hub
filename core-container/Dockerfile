@@ -1,14 +1,12 @@
 FROM tensorflow/tensorflow:2.2.1-gpu-jupyter
 
 #install nodejs
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends apt-utils \
-    && apt-get upgrade -y \
+RUN apt-get install -y --no-install-recommends apt-utils \
     && curl -sL https://deb.nodesource.com/setup_14.x | bash - \
     && apt-get install -y nodejs iputils-ping ssh nano
 
 #update pip
-RUN pip install --upgrade pip
+#RUN pip install --upgrade pip
 
 #install python requirements
 COPY ./core-container/requirements.txt /requirements.txt
