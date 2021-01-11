@@ -4,8 +4,8 @@ from sqlalchemy.orm import sessionmaker
 
 def main():
     # remove pid file if needed
-    if os.path.exists("/home/af-hub/airflow/airflow-webserver.pid"):
-        os.remove("/home/af-hub/airflow/airflow-webserver.pid")
+    if os.path.exists("/home/admin/airflow/airflow-webserver.pid"):
+        os.remove("/home/admin/airflow/airflow-webserver.pid")
     
     if "AIRFLOW__CORE__SQL_ALCHEMY_CONN" in os.environ:
         base_uri = os.environ['AIRFLOW__CORE__SQL_ALCHEMY_CONN']
