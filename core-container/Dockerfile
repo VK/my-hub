@@ -116,7 +116,8 @@ RUN jupyter tensorboard enable --user \
     && pip install tensorboard==2.2.0
 
 
-
+#downgrade jwt
+RUN pip install PyJWT==1.7.1
 
 ENTRYPOINT ["/run.sh"]
 CMD ["start"] # set default arg for entrypoint
