@@ -42,6 +42,16 @@ RUN pip install --upgrade jupyterlab-git \
     && pip install jupyter-lsp==0.9.3 python-language-server[all] \
     && jupyter labextension install @krassowski/jupyterlab-lsp --no-build
 
+# add latex jupyter-lsp support
+RUN apt-get install -y chktex \
+    && cd /tmp \
+    && wget -q https://github.com/latex-lsp/texlab/releases/download/v2.2.2/texlab-x86_64-linux.tar.gz \
+    && tar -xzvf texlab-x86_64-linux.tar.gz \
+    && cp ./texlab /usr/bin/ \
+    && rm -rf texlab* \
+# add markdown jupyter-lsp support
+    && npm install -g unified-language-server
+
 # copy some extra fonts
 COPY ./core-container/fonts/* /usr/local/share/fonts/
 
