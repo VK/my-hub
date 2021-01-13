@@ -39,7 +39,7 @@ RUN pip install --upgrade jupyterlab-git \
     && DEBIAN_FRONTEND=noninteractive apt install -yq texlive-xetex texlive-latex-extra texlive-generic-extra fontconfig \
     && jupyter labextension install @jupyterlab/latex  --no-build \
     && jupyter labextension install @jupyterlab/toc --no-build \
-    && pip install jupyter-lsp python-language-server[all] \
+    && pip install jupyter-lsp==0.9.3 python-language-server[all] \
     && jupyter labextension install @krassowski/jupyterlab-lsp --no-build
 
 # copy some extra fonts
