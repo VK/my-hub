@@ -1,7 +1,8 @@
 FROM tensorflow/tensorflow:2.2.1-gpu-jupyter
 
 #install nodejs
-RUN apt-get install -y --no-install-recommends apt-utils \
+RUN apt-get -y update \
+    && apt-get install -y --no-install-recommends apt-utils \
     && curl -sL https://deb.nodesource.com/setup_14.x | bash - \
     && apt-get install -y nodejs iputils-ping ssh nano
 
