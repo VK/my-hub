@@ -333,7 +333,7 @@ class DatabricksOperator(BaseOperator):
 
         self.parameters["workflow"] = json.dumps({
             "dagBase": dbr._get_fullpath(""),
-            "dagFolder": dbr._get_fullpath(os.path.join(self.dagfolder)[27:]),
+            "dagFolder": dbr._get_fullpath(os.path.join(self.dagfolder)[26:]),
             "workingDir": workingDir,
             "fileStore": "/dbfs/FileStore/shared_uploads/viktor.krueckl@osram-os.com/"
         })
@@ -357,7 +357,7 @@ class DatabricksOperator(BaseOperator):
 
             dbr = databricks.Databricks()
 
-            targetFile = os.path.join(self.dagfolder, self.inputFile)[27:]
+            targetFile = os.path.join(self.dagfolder, self.inputFile)[26:]
 
             dbr.mkdirs(os.path.dirname(targetFile))
 
