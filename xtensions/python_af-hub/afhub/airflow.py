@@ -22,7 +22,17 @@ config.read('/defaults.cfg')
 
 class PapermillOperator(BaseOperator):
     """
-    Executes a Jupyter Notebook with papermill locally
+
+    Executes a Jupyter Notebook with papermill locally.
+
+    Attributes
+    ----------
+    inputFile : str
+        the input Jupyter Notebook
+    outputFile : str
+        the output Jupyter Notebook
+    parameters : dict
+        additional parameters for the run
     """
     template_fields = ('templates_dict',)
     template_ext = tuple()
@@ -151,7 +161,19 @@ class PapermillOperator(BaseOperator):
 
 class LibraryOperator(BaseOperator):
     """
+    
     Create libraries for local use and databricks
+
+    Attributes
+    ----------
+    libFolder : str
+        the folder name of the python library
+    outputFile : str
+        the folder used for the output
+    version : str
+        version string like 1.0.0
+    to_databricks: bool
+        copy the library also to databricks
     """
     template_fields = ('templates_dict',)
     template_ext = tuple()
@@ -255,7 +277,26 @@ class LibraryOperator(BaseOperator):
 
 class DatabricksOperator(BaseOperator):
     """
+
     Executes a Jupyter Notebook on Databricks
+
+
+    Attributes
+    ----------
+    inputFile : str
+        the input Jupyter Notebook
+    outputFile : str
+        the output Jupyter Notebook
+    parameters : dict
+        additional parameters for the run
+    libraries : array
+        libraries added to databricks
+    new_cluster : dict
+        parameters for the cluster to create
+    existing_cluster_id : str
+        name of an existing cluster
+    terminate_cluster : bool
+        terminate cluster after finishing the job
     """
     template_fields = ('templates_dict',)
     template_ext = tuple()
@@ -440,7 +481,13 @@ class DatabricksOperator(BaseOperator):
 
 class UploadToDatabricks(BaseOperator):
     """
+
     Copy a file or more from the local FileStore to the Databricks FileStore
+
+    Attributes
+    ----------
+    inputFile : str, list
+        the file to copy to the Databricks FileStore
     """
     template_fields = ('templates_dict',)
     template_ext = tuple()
@@ -488,7 +535,13 @@ class UploadToDatabricks(BaseOperator):
 
 class DownloadFromDatabricks(BaseOperator):
     """
+
     Copy a file or more from the Databricks FileStore to the local FileStore
+
+    Attributes
+    ----------
+    inputFile : str, list
+        the file to collect from the Databricks FileStore
     """
     template_fields = ('templates_dict',)
     template_ext = tuple()
