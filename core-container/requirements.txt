@@ -20,7 +20,7 @@ XlsxWriter
 Pillow
 papermill
 nbclient==0.4.0
-tensorflow-probability
+tensorflow-probability==0.10.1
 psycopg2-binary
 docker
 nltk
