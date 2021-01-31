@@ -74,6 +74,9 @@ class PapermillOperator(BaseOperator):
         self.runDate = context['execution_date']
         self.dagName = context['dag'].dag_id
         self.dagfolder = context['dag'].folder
+        self.ti = context['ti']
+        self.dagrun = self.ti.get_dagrun()
+        self.parameters["conf"] = json.dumps(self.dagrun.conf)
 
         outputFileName = os.path.join(
             "/home/admin/workflow/output", self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
@@ -109,6 +112,11 @@ class PapermillOperator(BaseOperator):
                 parameters=self.parameters
             )
         except Exception as ex:
+
+            # skip mailing if it is not the last retry
+            if self.ti.max_tries >= self.ti.try_number:
+                raise ex
+
             try:
                 print("Render HTML")
                 os.system(
@@ -367,6 +375,9 @@ class DatabricksOperator(BaseOperator):
         self.runDate = context['execution_date']
         self.dagName = context['dag'].dag_id
         self.dagfolder = context['dag'].folder
+        self.ti = context['ti']
+        self.dagrun = self.ti.get_dagrun()
+        self.parameters["conf"] = json.dumps(self.dagrun.conf)
 
         outputFileName = os.path.join(
             "/home/admin/workflow/output", self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
@@ -432,6 +443,10 @@ class DatabricksOperator(BaseOperator):
                     dbr.terminate_cluster(self.existing_cluster_id)
 
         except Exception as ex:
+
+            # skip mailing if it is not the last retry
+            if self.ti.max_tries >= self.ti.try_number:
+                raise ex
 
             try:
                 print("Write Mails")
@@ -644,7 +659,7 @@ class RetryTaskGroup(TaskGroup):
 
     def retry_all(self, context):
         for key, task in self.children.items():
-            task.clear()
+            task.clear(start_date=context['execution_date'] , end_date=context['execution_date'] )
 
     def add(self, task: BaseOperator) -> None:
         super(RetryTaskGroup, self).add(task)
