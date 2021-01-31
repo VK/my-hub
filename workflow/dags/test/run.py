@@ -1,6 +1,6 @@
 from airflow import utils
 from airflow import DAG
-from afhub.airflow import PapermillOperator, UploadToDatabricks, DatabricksOperator, DownloadFromDatabricks, LibraryOperator
+from afhub.airflow import PapermillOperator, UploadToDatabricks, DatabricksOperator, DownloadFromDatabricks, LibraryOperator, RetryTaskGroup
 from datetime import datetime, timedelta
 
 
@@ -32,29 +32,27 @@ t1 = PapermillOperator(
 
 lib_task >> t1
 
+with RetryTaskGroup("upload_and_open", dag=dag) as gr1:
 
-t2 = UploadToDatabricks(
-    task_id="upload_to_dbr",
-    inputFile="test/test.json",
-    dag=dag
-)
+    t2 = UploadToDatabricks(
+        task_id="upload_to_dbr",
+        inputFile="test/test.json",
+        dag=dag
+    )
 
-t1 >> t2
+    t3 = DatabricksOperator(
+        task_id="open_file",
+        inputFile="03_OpenFile.ipynb",
+        outputFile="test/03_OpenFile.ipynb",
+        parameters={"d": 1234},
+        dag=dag,
+        existing_cluster_id = "1015-081007-swell768",
+        terminate_cluster = True
+    )
+    #t3.add_library(lib_task)
+    t2 >> t3
 
-
-
-t3 = DatabricksOperator(
-    task_id="open_file",
-    inputFile="03_OpenFile.ipynb",
-    outputFile="test/03_OpenFile.ipynb",
-    parameters={"d": 1234},
-    dag=dag,
-    existing_cluster_id = "1015-081007-swell768",
-    terminate_cluster = True
-)
-#t3.add_library(lib_task)
-
-t2 >> t3
+t1 >> gr1
 
 
 

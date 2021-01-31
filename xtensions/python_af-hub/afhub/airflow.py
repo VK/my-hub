@@ -1,6 +1,8 @@
 from . import databricks
 from airflow.exceptions import AirflowException
 from airflow.models import BaseOperator, SkipMixin
+from airflow.models.dag import DagContext
+from airflow.utils.task_group import TaskGroup
 from airflow.utils.decorators import apply_defaults
 from airflow.utils.file import TemporaryDirectory
 from airflow.utils.operator_helpers import context_to_airflow_vars
@@ -585,3 +587,74 @@ class DownloadFromDatabricks(BaseOperator):
             dbr.download_file(self.inputFile)
 
         return {}
+
+
+
+class RetryTaskGroup(TaskGroup):
+    """
+    A collection of tasks based on the airflow.utils.task_group.TaskGroup.
+    When set_downstream() or set_upstream() are called on the TaskGroup, it is
+    applied across all tasks within the group if necessary.
+    When one of the Tasks needs an retry. All tasks make a retry.
+    :param group_id: a unique, meaningful id for the TaskGroup. group_id must
+        not conflict with group_id of TaskGroup or task_id of tasks in the DAG.
+        Root TaskGroup has group_id set to None.
+    :type group_id: str
+    :param retries: the number of retries that should be performed before
+        failing the task. Default set to 3.
+    :type retries: int
+    :param prefix_group_id: If set to True, child task_id and group_id will be
+        prefixed with this TaskGroup's group_id. If set to False, child task_id
+        and group_id are not prefixed.
+        Default is True.
+    :type prefix_group_id: bool
+    :param parent_group: The parent TaskGroup of this TaskGroup. parent_group
+        is set to None for the root TaskGroup.
+    :type parent_group: TaskGroup
+    :param dag: The DAG that this TaskGroup belongs to.
+    :type dag: airflow.models.DAG
+    :param tooltip: The tooltip of the TaskGroup node when displayed in the UI
+    :type tooltip: str
+    :param ui_color: The fill color of the TaskGroup node when displayed in
+        the UI
+    :type ui_color: str
+    :param ui_fgcolor: The label color of the TaskGroup node when displayed in
+        the UI
+    :type ui_fgcolor: str
+    """
+
+    def __init__(self, *args, **kwargs):
+
+        print(kwargs)
+        if "retries" in kwargs:
+            self.retries = kwargs.pop("retries")
+        else:
+            self.retries = 3
+
+        kwargs["ui_color"] = "#ed7864"
+        kwargs["ui_fgcolor"] = "#fff"
+
+        super(RetryTaskGroup, self).__init__(*args, **kwargs)
+
+        if "dag" in kwargs:
+            self.dag = kwargs["dag"]
+        else:
+            self.dag = DagContext.get_current_dag()
+        self.old_args = dict(self.dag.default_args)
+
+    def retry_all(self, context):
+        for key, task in self.children.items():
+            task.clear()
+
+    def add(self, task: BaseOperator) -> None:
+        super(RetryTaskGroup, self).add(task)
+
+    def __enter__(self):
+        self.dag.default_args["on_retry_callback"] = self.retry_all
+        self.dag.default_args["retries"] = self.retries
+        super(RetryTaskGroup, self).__enter__()
+        return self
+
+    def __exit__(self, _type, _value, _tb):
+        self.dag.default_args = self.old_args
+        super(RetryTaskGroup, self).__exit__(_type, _value, _tb)
