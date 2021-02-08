@@ -6,10 +6,9 @@ __email__ = 'viktor@krueckl.de'
 __status__ = 'Dev'
 __version__ = '0.0.1'
 
+from .airflow import *
+from .mlflow import get_client as get_mlflow_client
+from .databricks import Databricks
+from .requests import Requests
 
-
-from afhub.airflow import *
-from afhub.mlflow import get_client as get_mlflow_client
-from afhub.databricks import Databricks
-
-__all__ = [airflow, mlflow, databricks]
+__all__ = [airflow, mlflow, databricks, requests]
