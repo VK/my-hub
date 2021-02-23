@@ -49,9 +49,9 @@ class Requests:
         add authentification to typical requests
         """
         if self.__auth == "bearer":
-            if "header" not in args:
-                args["header"] = {}
-            args["header"]["Authorization"] = f"Bearer {self.__token}"
+            if "headers" not in args:
+                args["headers"] = {}
+            args["headers"]["Authorization"] = f"Bearer {self.__token}"
         if self.__auth == "basic":
             args["auth"] = (self.__user, self.__password)
         return args
