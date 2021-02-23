@@ -66,7 +66,7 @@ class Requests:
         :return: :class:`Response <Response>` object
         :rtype: requests.Response
         """
-        return _requests.get(self.__get_url(url), self.__add_auth(kwargs))
+        return _requests.get(self.__get_url(url), **self.__add_auth(kwargs))
 
 
     def options(self, url, **kwargs):
@@ -77,7 +77,7 @@ class Requests:
         :return: :class:`Response <Response>` object
         :rtype: requests.Response
         """
-        return _requests.options(self.__get_url(url), self.__add_auth(kwargs))
+        return _requests.options(self.__get_url(url), **self.__add_auth(kwargs))
 
 
     def head(self, url, **kwargs):
@@ -88,7 +88,7 @@ class Requests:
         :return: :class:`Response <Response>` object
         :rtype: requests.Response
         """
-        return _requests.head(self.__get_url(url), self.__add_auth(kwargs))        
+        return _requests.head(self.__get_url(url), **self.__add_auth(kwargs))        
 
     
     def post(self, url, **kwargs):
@@ -102,7 +102,7 @@ class Requests:
         :return: :class:`Response <Response>` object
         :rtype: requests.Response
         """
-        return _requests.post(self.__get_url(url), self.__add_auth(kwargs))
+        return _requests.post(self.__get_url(url), **self.__add_auth(kwargs))
 
 
     def put(self, url, **kwargs):
@@ -115,7 +115,7 @@ class Requests:
         :return: :class:`Response <Response>` object
         :rtype: requests.Response
         """
-        return _requests.put(self.__get_url(url), self.__add_auth(kwargs))
+        return _requests.put(self.__get_url(url), **self.__add_auth(kwargs))
 
 
     def patch(self, url, **kwargs):
@@ -129,7 +129,7 @@ class Requests:
         :return: :class:`Response <Response>` object
         :rtype: requests.Response
         """
-        return _requests.patch(self.__get_url(url), self.__add_auth(kwargs))
+        return _requests.patch(self.__get_url(url), **self.__add_auth(kwargs))
 
 
     def delete(self, url, **kwargs):
@@ -140,6 +140,6 @@ class Requests:
         :return: :class:`Response <Response>` object
         :rtype: requests.Response
         """
-        return _requests.delete(self.__get_url(url), self.__add_auth(kwargs))
+        return _requests.delete(self.__get_url(url), **self.__add_auth(kwargs))
 
 
