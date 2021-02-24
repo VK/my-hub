@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+cd /jupyterhub
+
 case "$1" in
   start)
     supervisord

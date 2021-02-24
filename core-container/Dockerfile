@@ -111,6 +111,10 @@ COPY ./core-container/supervisord.conf /etc/supervisor/supervisord.conf
 #install airflow
 RUN pip install apache-airflow flask_bcrypt dtale
 
+#make a run directory
+RUN mkdir  /jupyterhub && chown admin:admin /jupyterhub && chmod 0700 /jupyterhub
+WORKDIR /jupyterhub
+
 #run container as admin
 USER admin
 
@@ -127,8 +131,9 @@ RUN jupyter tensorboard enable --user \
     && pip install tensorboard==2.2.0
 
 
-#downgrade jwt
-RUN pip install PyJWT==1.7.1
+#downgrade to fix compatibility problems 
+RUN pip install PyJWT==2.0.0
+RUN apt install -y libcurl4-openssl-dev libssl-dev && pip install psutil pycurl
 
 ENTRYPOINT ["/run.sh"]
 CMD ["start"] # set default arg for entrypoint
