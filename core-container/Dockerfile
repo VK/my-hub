@@ -114,6 +114,8 @@ RUN pip install apache-airflow flask_bcrypt dtale
 #make a run directory
 RUN mkdir  /jupyterhub && chown admin:admin /jupyterhub && chmod 0700 /jupyterhub
 WORKDIR /jupyterhub
+RUN apt install -y libcurl4-openssl-dev libssl-dev && pip install psutil pycurl
+RUN pip install pip install PyJWT==2.0.0
 
 #run container as admin
 USER admin
@@ -131,9 +133,6 @@ RUN jupyter tensorboard enable --user \
     && pip install tensorboard==2.2.0
 
 
-#downgrade to fix compatibility problems 
-RUN pip install PyJWT==2.0.0
-RUN apt install -y libcurl4-openssl-dev libssl-dev && pip install psutil pycurl
 
 ENTRYPOINT ["/run.sh"]
 CMD ["start"] # set default arg for entrypoint
