@@ -6,6 +6,7 @@ from airflow.utils.task_group import TaskGroup
 from airflow.utils.decorators import apply_defaults
 from airflow.utils.file import TemporaryDirectory
 from airflow.utils.operator_helpers import context_to_airflow_vars
+from airflow.utils.state import State
 import papermill as pm
 import os
 import smtplib
@@ -658,8 +659,13 @@ class RetryTaskGroup(TaskGroup):
         self.old_args = dict(self.dag.default_args)
 
     def retry_all(self, context):
-        for key, task in self.children.items():
-            task.clear(start_date=context['execution_date'] , end_date=context['execution_date'] )
+        if context["try_number"] < self.retries:
+            for key, task in self.children.items():
+                task.clear(start_date=context['execution_date'] , end_date=context['execution_date'] )
+        else:
+            for key, task in self.children.items():
+                task.state =  State.FAILED
+            self.state = State.FAILED
 
     def add(self, task: BaseOperator) -> None:
         super(RetryTaskGroup, self).add(task)
