@@ -659,13 +659,17 @@ class RetryTaskGroup(TaskGroup):
         self.old_args = dict(self.dag.default_args)
 
     def retry_all(self, context):
-        if context["try_number"] < self.retries:
+        ti = context["ti"]
+        print("check retry group")
+        if ti.try_number > self.retries:
+            print("mark failed")
+            ti.state.error()
+
+        if ti.state == State.UP_FOR_RETRY:
+            print("retry these tasks:")
             for key, task in self.children.items():
-                task.clear(start_date=context['execution_date'] , end_date=context['execution_date'] )
-        else:
-            for key, task in self.children.items():
-                task.state =  State.FAILED
-            self.state = State.FAILED
+                print(key)
+                task.clear(start_date=context['execution_date'], end_date=context['execution_date'])
 
     def add(self, task: BaseOperator) -> None:
         super(RetryTaskGroup, self).add(task)
