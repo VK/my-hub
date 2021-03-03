@@ -660,16 +660,21 @@ class RetryTaskGroup(TaskGroup):
 
     def retry_all(self, context):
         ti = context["ti"]
-        print("check retry group")
+        print("try {}".format(ti.try_number - 1))
         if ti.try_number > self.retries:
             print("mark failed")
-            ti.state.error()
-
-        if ti.state == State.UP_FOR_RETRY:
+            try:
+                ti.error()
+            except:
+                pass
+        else:
             print("retry these tasks:")
             for key, task in self.children.items():
                 print(key)
-                task.clear(start_date=context['execution_date'], end_date=context['execution_date'])
+                try:
+                    task.clear(start_date=context['execution_date'], end_date=context['execution_date'])
+                except:
+                    pass
 
     def add(self, task: BaseOperator) -> None:
         super(RetryTaskGroup, self).add(task)
