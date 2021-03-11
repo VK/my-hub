@@ -33,3 +33,5 @@ graphviz
 psutil
 bs4
 xlrd
+msal
+
