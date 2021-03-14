@@ -37,7 +37,7 @@ RUN pip install --upgrade jupyterlab-git \
     && jupyter labextension install jupyterlab-chart-editor  --no-build \
     && pip install jupyterlab_proxy_gui \
     && pip install jupyterlab_latex \
-    && DEBIAN_FRONTEND=noninteractive apt install -yq texlive-xetex texlive-latex-extra texlive-generic-extra fontconfig \
+    && DEBIAN_FRONTEND=noninteractive apt install -yq texlive-xetex texlive-latex-extra texlive-generic-extra fontconfig texlive-lang-german \
     && jupyter labextension install @jupyterlab/latex  --no-build \
     && jupyter labextension install @jupyterlab/toc --no-build \
     && pip install jupyter-lsp==0.9.3 python-language-server[all] \
