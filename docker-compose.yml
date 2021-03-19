@@ -11,6 +11,7 @@ services:
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://airflow:airflow@postgres:5432/hub1
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock
+      - mlflow:/home/admin/mlflow
     secrets:
       - source: server.crt
         target: /cer.pem
@@ -63,3 +64,4 @@ volumes:
   mongodb:
   mongodb_config:
   pgdata:
+  mlflow:
