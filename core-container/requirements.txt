@@ -24,7 +24,7 @@ tensorflow-probability==0.10.1
 psycopg2-binary
 docker
 nltk
-mlflow
+mlflow==1.14.1
 pypc
 hyperopt
 pyarrow
