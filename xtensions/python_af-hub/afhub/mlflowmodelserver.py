@@ -28,6 +28,7 @@ import datetime
 
 # register route
 import requests
+import os
 import json
 import configparser
 config = configparser.ConfigParser()
@@ -37,12 +38,18 @@ headers = {'Authorization': "access_token {}".format(
 baseurl = "http://127.0.0.1:8001"
 requests.post("{}/api/routes/user/admin/models/".format(baseurl), headers=headers,
               data=json.dumps({'target': 'http://localhost:4041', 'cookiecheck': False}))
-requests.post("{}/api/routes/models/".format(baseurl), headers=headers,
-              data=json.dumps({'target': 'http://localhost:4041', 'cookiecheck': False}))
 
 # connect to mlflow
 mlflow.set_tracking_uri("http://localhost:4040")
 client = MlflowClient()
+
+
+def load_artifact(run_id, artifact_path):
+    params = {"path": artifact_path,
+              "run_uuid": run_id}
+    res = requests.get(
+        "http://localhost:4040/user/admin/mlflow/get-artifact", params=params)
+    return res
 
 
 basepath = "/user/admin/models"
@@ -130,6 +137,8 @@ class PyFuncHandler:
         "float64": 1.234,
         "float32": 1.234,
         "int": 1,
+        "int64": 1,
+        "int32": 1,
         "str": "A",
     }
 
@@ -143,12 +152,34 @@ class PyFuncHandler:
             input_schema = None
             output_schema = None
 
+        try:
+            res = load_artifact(model_version.run_id, os.path.join(model.metadata.artifact_path,
+                                model.metadata.saved_input_example_info['artifact_path']
+                                                                   ))
+            input_example_data = res.json()['inputs']
+        except:
+            input_example_data = {}
+
         input_schema_class = type(name+"-input",
                                   (BaseModel, ),
-                                  {el["name"]: self.get_example_el(el) for el in input_schema.to_dict()})
+                                  {el["name"]:
+                                   input_example_data[el["name"]]
+                                   if el["name"] in input_example_data else
+                                   self.get_example_el(el) for el in input_schema.to_dict()})
+
+        try:
+            np_input = self.numpy_input(input_example_data, input_schema)
+            output_example_data = model.predict(np_input)
+            output_example_data = {k:v.tolist() for k,v in output_example_data.items()}
+        except:
+            output_example_data = {}
+
         output_schema_class = type(name+"-output",
                                    (BaseModel, ),
-                                   {el["name"]: self.get_example_el(el) for el in output_schema.to_dict()})
+                                   {el["name"]:
+                                    output_example_data[el["name"]]
+                                    if el["name"] in output_example_data else
+                                    self.get_example_el(el) for el in output_schema.to_dict()})
 
         self.version = model_version.version
         self.source = model_version.source
@@ -286,3 +317,4 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     update_models()
     uvicorn.run(app, port=4041)
+
