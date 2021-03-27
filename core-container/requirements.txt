@@ -34,4 +34,5 @@ psutil
 bs4
 xlrd
 msal
-
+fastapi
+uvicorn

@@ -40,3 +40,6 @@ pass = ???
 url = ???
 token = ???
 
+[MLflowModelServerTokens]
+test = Viktor
+
