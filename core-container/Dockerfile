@@ -57,7 +57,8 @@ RUN apt-get install -y chktex \
 COPY ./core-container/fonts/* /usr/local/share/fonts/
 
 # update and build extensions
-RUN jupyter lab build --dev-build=False --minimize=False
+#RUN jupyter labextension update --all --no-build \
+#    && jupyter lab build --dev-build=False --minimize=False
 
 
 #create admin user
