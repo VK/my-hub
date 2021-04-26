@@ -41,7 +41,8 @@ RUN pip install --upgrade jupyterlab-git \
     && jupyter labextension install @jupyterlab/latex  --no-build \
     && jupyter labextension install @jupyterlab/toc --no-build \
     && pip install jupyter-lsp==0.9.3 python-language-server[all] \
-    && jupyter labextension install @krassowski/jupyterlab-lsp --no-build
+    && jupyter labextension install @krassowski/jupyterlab-lsp@2.1.4 --no-build
+
 
 # add latex jupyter-lsp support
 RUN apt-get install -y chktex \
@@ -57,8 +58,8 @@ RUN apt-get install -y chktex \
 COPY ./core-container/fonts/* /usr/local/share/fonts/
 
 # update and build extensions
-#RUN jupyter labextension update --all --no-build \
-#    && jupyter lab build --dev-build=False --minimize=False
+RUN jupyter labextension update --all --no-build \
+    && jupyter lab build --dev-build=False --minimize=False
 
 
 #create admin user
