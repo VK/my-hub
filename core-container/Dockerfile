@@ -133,7 +133,7 @@ RUN jupyter tensorboard enable --user \
     && pip install tensorboard==2.2.0
 
 
-EXPOSE 5050 5051
+EXPOSE 5050 5051 4040 4041
 
 ENTRYPOINT ["/run.sh"]
 CMD ["start"] # set default arg for entrypoint
