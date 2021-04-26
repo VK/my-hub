@@ -109,7 +109,7 @@ RUN apt -y install supervisor
 COPY ./core-container/supervisord.conf /etc/supervisor/supervisord.conf
 
 #install airflow
-RUN pip install apache-airflow flask_bcrypt dtale SQLAlchemy==1.3.23
+RUN pip install apache-airflow==2.0.1 flask_bcrypt dtale SQLAlchemy==1.3.23
 
 #make a run directory
 RUN mkdir  /jupyterhub && chown admin:admin /jupyterhub && chmod 0700 /jupyterhub
