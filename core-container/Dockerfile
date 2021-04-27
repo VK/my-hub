@@ -26,7 +26,7 @@ COPY ./configurable-http-proxy/lib/configproxy.js \
 
 
 #install jupyter lab extensions
-RUN pip install --upgrade jupyterlab-git \
+RUN pip install jupyterlab-git==0.24.0 \
     && pip install --pre jupyter-tensorboard \
     && jupyter tensorboard enable \
     && jupyter labextension install jupyterlab_tensorboard --no-build \
