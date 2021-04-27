@@ -52,8 +52,9 @@ def load_artifact(run_id, artifact_path):
     return res
 
 
-basepath = "/user/admin/models"
-staging = False
+basepath = os.getenv("MLSERVE_BASEPATH", "/user/admin/models")
+staging = os.getenv("MLSERVE_STAGING", 'False').lower() in ('true', '1', 't')
+withlinks = os.getenv("MLSERVE_LINKS", 'False').lower() in ('true', '1', 't')
 basepath_re = "^" + basepath.replace("/", "\\/")+"\\/"
 
 tags_metadata = [
@@ -220,18 +221,24 @@ class PyFuncHandler:
             return output
 
     def get_version_link(self, name, model_version):
-        url = f"/user/admin/mlflow/#/models/{name}/versions/{model_version.version}"
-        return f"<a href=\"{url}\">{model_version.version}</a>"
+        if withlinks:
+            url = f"/user/admin/mlflow/#/models/{name}/versions/{model_version.version}"
+            return f"<a href=\"{url}\">{model_version.version}</a>"
+        else:
+            return f"{model_version.version}"
 
     def get_experiment_link(self, model_version):
-        source = model_version.source
-        url = source.replace("/home/admin/mlflow",
-                             "/user/admin/mlflow/#/experiments")
-        url = re.sub(r'/artifacts.*', '', url)
-        parts = url.split("/")
-        parts.insert(7, "runs")
-        url = "/".join(parts)
-        return f"<a href=\"{url}\">{model_version.run_id}</a>"
+        if withlinks:
+            source = model_version.source
+            url = source.replace("/home/admin/mlflow",
+                                "/user/admin/mlflow/#/experiments")
+            url = re.sub(r'/artifacts.*', '', url)
+            parts = url.split("/")
+            parts.insert(7, "runs")
+            url = "/".join(parts)
+            return f"<a href=\"{url}\">{model_version.run_id}</a>"
+        else:
+            return f"{model_version.run_id}"
 
     def get_nested(self, dtype, shape):
         if len(shape) == 1:
