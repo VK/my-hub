@@ -21,7 +21,7 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          return context.payload.ref.replace(/\/refs\/tags\//, '');
+          return context.payload.ref.replace(/\/refs\/tags\//, '').replace(/\/refs\/heads\/master\//,'');
 
     - name: Extract branch name
       shell: bash
