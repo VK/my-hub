@@ -1,4 +1,5 @@
-FROM tensorflow/tensorflow:2.2.1-gpu-jupyter
+FROM tensorflow/tensorflow:2.5.0rc2-gpu-jupyter
+
 
 #install nodejs
 RUN apt-get -y update \
@@ -15,7 +16,7 @@ RUN pip install -r /requirements.txt
 
 
 #install jupyterhub
-RUN pip install jupyterlab==2.2.9 jupyterhub \
+RUN pip install jupyterlab==3.0.14 jupyterhub \
     && npm install -g configurable-http-proxy \
     && pip install oauthenticator PyJWT
 
@@ -26,32 +27,35 @@ COPY ./configurable-http-proxy/lib/configproxy.js \
 
 
 #install jupyter lab extensions
-RUN pip install jupyterlab-git==0.24.0 \
-    && pip install --pre jupyter-tensorboard \
-    && jupyter tensorboard enable \
-    && jupyter labextension install jupyterlab_tensorboard --no-build \
+RUN pip install jupyterlab-git==0.30.0 \
+    # && pip install --pre jupyter-tensorboard \
+    # && jupyter tensorboard enable \
     && pip install ipympl \
     && jupyter labextension install jupyterlab-plotly --no-build \
     && jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build \
-    && jupyter labextension install jupyterlab-spreadsheet --no-build \
+    && pip install jupyterlab-spreadsheet-editor jupyterlab-tabular-data-editor\
     && jupyter labextension install jupyterlab-chart-editor  --no-build \
     && pip install jupyterlab_proxy_gui \
     && pip install jupyterlab_latex \
     && DEBIAN_FRONTEND=noninteractive apt install -yq texlive-xetex texlive-latex-extra texlive-generic-extra fontconfig texlive-lang-german \
-    && jupyter labextension install @jupyterlab/latex  --no-build \
-    && jupyter labextension install @jupyterlab/toc --no-build \
-    && pip install jupyter-lsp==0.9.3 python-language-server[all] \
-    && jupyter labextension install @krassowski/jupyterlab-lsp@2.1.4 --no-build
+    # && jupyter labextension install @jupyterlab/latex  --no-build \  #wait for jupyterlab 3.0
+    && pip install jupyter-lsp python-language-server[all] \
+    && jupyter labextension install @krassowski/jupyterlab-lsp@2.1.4 --no-build \
+    && echo "ENDE"
 
 
-# add latex jupyter-lsp support
+#init tensorboard for users
+RUN pip install git+https://github.com/cliffwoolley/jupyter_tensorboard.git \
+    && pip install git+https://github.com/chaoleili/jupyterlab_tensorboard.git
+
+# # add latex jupyter-lsp support
 RUN apt-get install -y chktex \
     && cd /tmp \
     && wget -q https://github.com/latex-lsp/texlab/releases/download/v2.2.2/texlab-x86_64-linux.tar.gz \
     && tar -xzvf texlab-x86_64-linux.tar.gz \
     && cp ./texlab /usr/bin/ \
     && rm -rf texlab* \
-# add markdown jupyter-lsp support
+# # add markdown jupyter-lsp support
     && npm install -g unified-language-server
 
 # copy some extra fonts
@@ -128,9 +132,7 @@ COPY ./core-container/main-jupyterlab-proxy-gui-config.json /home/admin/.jupyter
 COPY ./core-container/guest-jupyterlab-proxy-gui-config.json /home/guest/.jupyterlab-proxy-gui-config.json
 
 
-#init tensorboard for users
-RUN jupyter tensorboard enable --user \
-    && pip install tensorboard==2.2.0
+
 
 
 EXPOSE 5050 5051 4040 4041

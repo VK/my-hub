@@ -1,10 +1,10 @@
 name: Create Docker Image
 
 on:
+  release:
+      types: [published]
   push:
     branches: [ master ]
-  schedule:
-    - cron: '0 3 4,18 * *'
 
 jobs:
 
@@ -23,3 +23,4 @@ jobs:
         cache: false
         dockerfile: core-container/Dockerfile  
         snapshot: true
+        tags: "latest,${{ env.STATE_RELEASE_VERSION }}"
