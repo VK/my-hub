@@ -22,5 +22,4 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
         cache: false
         dockerfile: core-container/Dockerfile  
-        snapshot: true
         tags: "latest,${{ env.STATE_RELEASE_VERSION }}"
