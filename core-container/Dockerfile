@@ -46,7 +46,7 @@ RUN pip install jupyterlab-git \
     && echo "ENDE"
 
 
-#init tensorboard for users
+#install git tensorbord 
 RUN pip install git+https://github.com/cliffwoolley/jupyter_tensorboard.git \
     && pip install git+https://github.com/chaoleili/jupyterlab_tensorboard.git
 
@@ -133,7 +133,11 @@ COPY ./core-container/assure_airflow_db.py /assure_airflow_db.py
 COPY ./core-container/main-jupyterlab-proxy-gui-config.json /home/admin/.jupyterlab-proxy-gui-config.json
 COPY ./core-container/guest-jupyterlab-proxy-gui-config.json /home/guest/.jupyterlab-proxy-gui-config.json
 
+# init tensorboard as user
+RUN jupyter tensorboard enable --user
 
+# add config for jupyter-resource-usage
+COPY ./core-container/jupyter_notebook_config.py /home/admin/.jupyter/jupyter_notebook_config.py
 
 
 
