@@ -36,3 +36,4 @@ xlrd
 msal
 fastapi
 uvicorn
+tables
