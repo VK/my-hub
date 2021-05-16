@@ -15,6 +15,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Experimental docker for squash
+      id: experimental_docker
+      run: |
+        sudo bash -c 'echo "{ "cgroup-parent": "/actions_job","experimental":true}" > /etc/docker/daemon.json'
+        sudo systemctl restart docker.service
+
     - name: Get the version
       id: get_version
       run: |
@@ -28,5 +34,6 @@ jobs:
         name: vikru/my-hub
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        dockerfile: core-container/Dockerfile  
+        dockerfile: core-container/Dockerfile
+        buildoptions: "--squash"
         tags: "${{ steps.get_version.outputs.VERSION }}"

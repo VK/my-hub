@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.5.0rc2-gpu-jupyter
+FROM tensorflow/tensorflow:2.5.0-gpu-jupyter
 
 
 #install nodejs
@@ -36,7 +36,7 @@ RUN pip install jupyterlab-git \
     && pip install jupyterlab-spreadsheet-editor jupyterlab-tabular-data-editor\
     && jupyter labextension install jupyterlab-chart-editor  --no-build \
     && pip install jupyterlab_proxy_gui \
-    && pip install jupyterlab_latex \
+    #&& pip install jupyterlab_latex \
     && DEBIAN_FRONTEND=noninteractive apt install -yq texlive-xetex texlive-latex-extra texlive-generic-extra fontconfig texlive-lang-german \
     # && jupyter labextension install @jupyterlab/latex  --no-build \  #wait for jupyterlab 3.0
     && pip install jupyter-lsp python-language-server[all] \
@@ -46,11 +46,23 @@ RUN pip install jupyterlab-git \
     && echo "ENDE"
 
 
-#install git tensorbord 
+# install git tensorbord 
 RUN pip install git+https://github.com/cliffwoolley/jupyter_tensorboard.git \
     && pip install git+https://github.com/chaoleili/jupyterlab_tensorboard.git
 
-# # add latex jupyter-lsp support
+# install git jupyterlab-latex
+RUN cd / \
+    && git clone https://github.com/joequant/jupyterlab-latex.git \
+    && cd jupyterlab-latex \
+    && jlpm install \
+    && jlpm run build \
+    && jupyter labextension install . --no-build \
+    && python setup.py build \
+    && pip install . \
+    && cd / \
+    && rm -rf jupyterlab-latex
+
+# add latex jupyter-lsp support
 RUN apt-get install -y chktex \
     && cd /tmp \
     && wget -q https://github.com/latex-lsp/texlab/releases/download/v2.2.2/texlab-x86_64-linux.tar.gz \
