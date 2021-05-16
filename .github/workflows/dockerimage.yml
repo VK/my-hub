@@ -18,8 +18,10 @@ jobs:
     - name: Experimental docker for squash
       id: experimental_docker
       run: |
-        echo '{"experimental": true}' | sudo tee -a /etc/docker/daemon.json
-        sudo systemctl restart docker.service
+        sudo rm /etc/docker/daemon.json || true
+        echo $'{ "experimental": true }' | sudo tee /etc/docker/daemon.json
+        sudo service docker restart
+        docker version -f '{{.Server.Experimental}}'
 
     - name: Get the version
       id: get_version
