@@ -41,7 +41,7 @@ RUN pip install jupyterlab-git \
     # && jupyter labextension install @jupyterlab/latex  --no-build \  #wait for jupyterlab 3.0
     && pip install jupyter-lsp python-language-server[all] \
     && jupyter labextension install @krassowski/jupyterlab-lsp@2.1.4 --no-build \
-    && pip install jupyter-resource-usage jupyterlab-topbar jupyterlab-system-monitor \
+    #&& pip install jupyter-resource-usage jupyterlab-topbar jupyterlab-system-monitor \
     && pip install xeus-python \
     && echo "ENDE"
 
