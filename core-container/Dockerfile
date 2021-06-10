@@ -33,7 +33,8 @@ RUN pip install jupyterlab-git \
     && pip install ipympl \
     && jupyter labextension install jupyterlab-plotly --no-build \
     && jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build \
-    && pip install jupyterlab-spreadsheet-editor jupyterlab-tabular-data-editor\
+    #&& pip install jupyterlab-spreadsheet-editor jupyterlab-tabular-data-editor\
+    && pip install jupyterlab-tabular-data-editor\
     && jupyter labextension install jupyterlab-chart-editor  --no-build \
     && pip install jupyterlab_proxy_gui \
     #&& pip install jupyterlab_latex \
@@ -76,7 +77,8 @@ RUN apt-get install -y chktex \
 COPY ./core-container/fonts/* /usr/local/share/fonts/
 
 # build extensions
-RUN jupyter lab build --dev-build=False --minimize=False
+# RUN jupyter lab build --dev-build=False --minimize=False
+RUN jupyter lab build --dev-build=False --minimize=True
 
 
 #create admin user
