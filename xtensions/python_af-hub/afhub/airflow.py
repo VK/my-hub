@@ -80,7 +80,7 @@ class PapermillOperator(BaseOperator):
         self.parameters["conf"] = json.dumps(self.dagrun.conf)
 
         outputFileName = os.path.join(
-            "/home/admin/workflow/output", self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
+            "/home/admin/workflow/output", self.dagName, self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
         workingDir = os.path.dirname(outputFileName)
 
         self.parameters["workflow"] = json.dumps({
@@ -96,7 +96,7 @@ class PapermillOperator(BaseOperator):
 
     def execute_callable(self):
         outputFileName = os.path.join(
-            "/home/admin/workflow/output", self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
+            "/home/admin/workflow/output", self.dagName, self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
         workingDir = os.path.dirname(outputFileName)
 
         res = {}
@@ -108,6 +108,7 @@ class PapermillOperator(BaseOperator):
             res = pm.execute_notebook(
                 os.path.join(self.dagfolder, self.inputFile),
                 os.path.join("/home/admin/workflow/output",
+                             self.dagName,
                              self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile),
                 cwd=workingDir,
                 parameters=self.parameters
@@ -226,11 +227,12 @@ class LibraryOperator(BaseOperator):
     def execute(self, context):
         self.dagfolder = context['dag'].folder
         self.fullLibFolder = os.path.join(self.dagfolder, self.libFolder)
+        self.dagName = context['dag'].dag_id
 
         # create the output of the local library copy
         self.runDate = context['execution_date']
         outputFolder = os.path.join(
-            "/home/admin/workflow/output", self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFolder, self.libName)
+            "/home/admin/workflow/output", self.dagName, self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFolder, self.libName)
 
         if not os.path.isdir(outputFolder):
             os.makedirs(outputFolder)
@@ -275,6 +277,7 @@ class LibraryOperator(BaseOperator):
         with open(
                 os.path.join(
                     "/home/admin/workflow/output",
+                    self.dagName,
                     self.runDate.strftime("%Y-%m-%d_%H_%M"),
                     self.outputFolder,
                     "LibraryOperator"),
@@ -381,7 +384,7 @@ class DatabricksOperator(BaseOperator):
         self.parameters["conf"] = json.dumps(self.dagrun.conf)
 
         outputFileName = os.path.join(
-            "/home/admin/workflow/output", self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
+            "/home/admin/workflow/output", self.dagName, self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
         workingDir = os.path.dirname(outputFileName)
 
         dbr = databricks.Databricks()
@@ -399,7 +402,7 @@ class DatabricksOperator(BaseOperator):
 
     def execute_callable(self):
         outputFileName = os.path.join(
-            "/home/admin/workflow/output", self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
+            "/home/admin/workflow/output", self.dagName, self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
         workingDir = os.path.dirname(outputFileName)
         fileName = outputFileName[len(workingDir)+1:]
 
