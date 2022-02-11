@@ -10,7 +10,7 @@ default_args = {
     'start_date':  datetime(2020, 4, 1),
 }
 
-dag = DAG('TestOperator', schedule_interval='0 0 * * *', default_args=default_args, catchup=False)
+dag = DAG('TestOperator', schedule_interval=None, default_args=default_args, catchup=False)
 
 
 
@@ -46,7 +46,7 @@ with RetryTaskGroup("upload_and_open", dag=dag) as gr1:
         outputFile="test/03_OpenFile.ipynb",
         parameters={"d": 1234},
         dag=dag,
-        existing_cluster_id = "1015-081007-swell768",
+        existing_cluster_id = "1001-122108-fife94",
         terminate_cluster = True
     )
     #t3.add_library(lib_task)

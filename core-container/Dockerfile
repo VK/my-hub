@@ -16,7 +16,7 @@ RUN pip install -r /requirements.txt
 
 
 #install jupyterhub
-RUN pip install jupyterlab==3.0.14 jupyterhub \
+RUN pip install jupyterlab==3.2.9 jupyterhub \
     && npm install -g configurable-http-proxy \
     && pip install oauthenticator PyJWT
 
@@ -38,10 +38,10 @@ RUN pip install jupyterlab-git \
     && jupyter labextension install jupyterlab-chart-editor  --no-build \
     && pip install jupyterlab_proxy_gui \
     #&& pip install jupyterlab_latex \
-    && DEBIAN_FRONTEND=noninteractive apt install -yq texlive-xetex texlive-latex-extra texlive-generic-extra fontconfig texlive-lang-german \
+    && DEBIAN_FRONTEND=noninteractive apt install -yq texlive-xetex texlive-latex-extra fontconfig texlive-lang-german \
     # && jupyter labextension install @jupyterlab/latex  --no-build \  #wait for jupyterlab 3.0
     && pip install jupyter-lsp python-language-server[all] \
-    && jupyter labextension install @krassowski/jupyterlab-lsp@2.1.4 --no-build \
+    && jupyter labextension install @krassowski/jupyterlab-lsp --no-build \
     #&& pip install jupyter-resource-usage jupyterlab-topbar jupyterlab-system-monitor \
     && pip install xeus-python \
     && echo "ENDE"
@@ -52,16 +52,16 @@ RUN pip install git+https://github.com/cliffwoolley/jupyter_tensorboard.git \
     && pip install git+https://github.com/chaoleili/jupyterlab_tensorboard.git
 
 # install git jupyterlab-latex
-RUN cd / \
-    && git clone https://github.com/joequant/jupyterlab-latex.git \
-    && cd jupyterlab-latex \
-    && jlpm install \
-    && jlpm run build \
-    && jupyter labextension install . --no-build \
-    && python setup.py build \
-    && pip install . \
-    && cd / \
-    && rm -rf jupyterlab-latex
+# RUN cd / \
+#     && git clone https://github.com/joequant/jupyterlab-latex.git \
+#     && cd jupyterlab-latex \
+#     && jlpm install \
+#     && jlpm run build \
+#     && jupyter labextension install . --no-build \
+#     && python setup.py build \
+#     && pip install . \
+#     && cd / \
+#     && rm -rf jupyterlab-latex
 
 # add latex jupyter-lsp support
 RUN apt-get install -y chktex \
@@ -112,7 +112,7 @@ RUN chmod 777 /run.sh
 COPY ./xtensions /xtensions
 RUN chown -R admin:admin /xtensions
 WORKDIR /xtensions/python_af-hub
-RUN python setup.py build && python setup.py install
+RUN python setup.py build && pip install .
 
 
 # copy base workflow to home directory

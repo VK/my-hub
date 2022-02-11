@@ -3,7 +3,7 @@ flask_cors
 flask_oauthlib
 numpy
 pandas
-dash==1.2.0
+dash
 dash-daq
 dash-bootstrap-components
 pandas-datareader
@@ -19,8 +19,8 @@ matplotlib
 XlsxWriter
 Pillow
 papermill
-nbclient==0.4.0
-tensorflow-probability==0.10.1
+nbclient
+tensorflow-probability==0.15.0
 psycopg2-binary
 docker
 nltk
@@ -37,3 +37,5 @@ msal
 fastapi
 uvicorn
 tables
+wtforms==2.3.3
+Markdown==3.3.4
