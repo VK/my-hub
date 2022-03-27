@@ -1,12 +1,15 @@
+from subprocess import check_call
+import json
+import configparser
 import os
 from os import path
+import pwd
+import grp
 
 
 c.Application.log_level = 'DEBUG'
 
-#setup active directory login
-import configparser
-import json
+# setup active directory login
 config = configparser.ConfigParser()
 config.read('/defaults.cfg')
 
@@ -16,7 +19,8 @@ if config.has_section("LocalGitHubOAuthenticator"):
     from oauthenticator.github import LocalGitHubOAuthenticator
     c.JupyterHub.authenticator_class = LocalGitHubOAuthenticator
 
-    c.LocalGitHubOAuthenticator.oauth_callback_url = config["LocalGitHubOAuthenticator"]["callback_url"]
+    c.LocalGitHubOAuthenticator.oauth_callback_url = config[
+        "LocalGitHubOAuthenticator"]["callback_url"]
     c.LocalGitHubOAuthenticator.client_id = config["LocalGitHubOAuthenticator"]["client_id"]
     c.LocalGitHubOAuthenticator.client_secret = config["LocalGitHubOAuthenticator"]["client_secret"]
 
@@ -35,28 +39,51 @@ if config.has_section("AzureAdOAuthenticator"):
 c.ConfigurableHTTPProxy.auth_token = config["ConfigurableHTTPProxy"]["auth_token"]
 
 
-#map users to af-hub user
-c.Authenticator.username_map  = { u: 'guest' for u in json.loads(config["Authenticator"]["users"])}
-c.Authenticator.username_map.update({ u: 'admin' for u in json.loads(config["Authenticator"]["admins"])})
+# map users to af-hub user
+c.Authenticator.username_map = {
+    u: 'guest' for u in json.loads(config["Authenticator"]["users"])}
+c.Authenticator.username_map.update({u: u.replace(' ', '').replace(
+    ',', '') for u in json.loads(config["Authenticator"]["admins"])})
 
-#add sudospawner
-c.JupyterHub.spawner_class='sudospawner.SudoSpawner'
+# add sudospawner
+c.JupyterHub.spawner_class = 'sudospawner.SudoSpawner'
 
-#setup ssl
+# setup ssl
 c.Spawner.default_url = '/lab'
 c.JupyterHub.ssl_key = '/key.pem'
 c.JupyterHub.ssl_cert = '/cer.pem'
 
-#keep all environ variables
+# keep all environ variables
 for var in os.environ:
     c.Spawner.env_keep.append(var)
 
-
-
-from subprocess import check_call
+# c.LocalAuthenticator.create_system_users = True
 def my_script_hook(spawner):
+    username = spawner.user.name
+
+    if not path.exists(f"/home/{username}"):
+        
+        try:
+            check_call(["sudo", "useradd", "-m", username, "-s", "/usr/bin/bash"])
+        except:
+            check_call(["sudo", "mkdir", "-p", f"/home/{username}"])
+            pass
+
+        
+        check_call(["sudo", "cp", "/home/admin/.bashrc", f"/home/{username}/.bashrc"])
+        check_call(["sudo", "cp", "/home/admin/.jupyterlab-proxy-gui-config.json", f"/home/{username}/.jupyterlab-proxy-gui-config.json"])
+
+        check_call(["sudo", "chown", "-R", f"{username}:{username}", f"/home/{username}"])
+        check_call(["sudo", "setfacl", "-Rm", f"u:{username}:rwX,d:u:{username}:rwX", f"/home/admin/workflow"])
+
+        check_call(["sudo", "ln", "-s", "/home/admin/workflow", f"/home/{username}/workflow"])
+
+        
+
+
     if path.exists('/home/admin/workflow/setup.sh'):
-      check_call(['/home/admin/workflow/setup.sh'])
+        check_call(['/home/admin/workflow/setup.sh', username])
+
 
 # attach the hook function to the spawner
 c.Spawner.pre_spawn_hook = my_script_hook

@@ -6,7 +6,9 @@ services:
     image: vikru/my-hub
     restart: always
     ports:
-      - 443:8000
+      - 9950:8000
+    depends_on:
+      - "postgres"      
     environment:      
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://airflow:airflow@postgres:5432/hub1
     volumes:

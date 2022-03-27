@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.7.1-jupyter
+FROM tensorflow/tensorflow:2.8.0-jupyter
 
 
 #install nodejs
@@ -122,20 +122,23 @@ RUN ln -s /home/admin/workflow /home/guest/
 
 #add sudo spawner stuff
 COPY ./core-container/sudoers_addon /sudoers_addon
-RUN apt-get install sudo && pip install sudospawner && cat /sudoers_addon >> /etc/sudoers
+RUN apt-get install sudo && pip install sudospawner && cat /sudoers_addon >> /etc/sudoers && usermod -aG sudo admin
 
 #install supervisord
 RUN apt -y install supervisor
 COPY ./core-container/supervisord.conf /etc/supervisor/supervisord.conf
 
 #install airflow
-RUN pip install apache-airflow==2.0.1 flask_bcrypt dtale SQLAlchemy==1.3.23
+RUN pip install apache-airflow==2.2.4 flask_bcrypt dtale SQLAlchemy==1.4.32
 
 #make a run directory
 RUN mkdir  /jupyterhub && chown admin:admin /jupyterhub && chmod 0700 /jupyterhub
 WORKDIR /jupyterhub
 RUN apt install -y libcurl4-openssl-dev libssl-dev && pip install psutil pycurl
 RUN pip install pip install PyJWT==2.0.0
+
+# add acl
+RUN apt-get -y install acl 
 
 #run container as admin
 USER admin

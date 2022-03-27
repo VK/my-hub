@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+python /assure_airflow_db.py
 cd /jupyterhub
 
 case "$1" in

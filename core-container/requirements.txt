@@ -20,11 +20,11 @@ XlsxWriter
 Pillow
 papermill
 nbclient
-tensorflow-probability==0.15.0
+tensorflow-probability==0.16.0
 psycopg2-binary
 docker
 nltk
-mlflow==1.23.1
+mlflow==1.24.0
 pypc
 hyperopt
 pyarrow
@@ -39,3 +39,6 @@ uvicorn
 tables
 wtforms==2.3.3
 Markdown==3.3.4
+mixturemapping
+mongodf
+
