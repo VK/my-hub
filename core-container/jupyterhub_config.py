@@ -1,4 +1,5 @@
 from subprocess import check_call
+import getpass
 import json
 import configparser
 import os
@@ -46,8 +47,9 @@ if config.getboolean("Authenticator", "own_home", fallback=False):
     c.Authenticator.username_map.update({u: u.replace(' ', '').replace(
         ',', '') for u in json.loads(config["Authenticator"]["admins"])})
 else:
+    admin_name = getpass.getuser()
     c.Authenticator.username_map.update(
-        {u: 'admin' for u in json.loads(config["Authenticator"]["admins"])})
+        {u: admin_name for u in json.loads(config["Authenticator"]["admins"])})
 
 
 # add sudospawner
