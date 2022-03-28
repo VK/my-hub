@@ -155,7 +155,7 @@ RUN jupyter tensorboard enable --user
 # add config for jupyter-resource-usage
 COPY ./core-container/jupyter_notebook_config.py /home/admin/.jupyter/jupyter_notebook_config.py
 
-RUN chown admin:root /home/admin && chmod -R g+rwX /home/admin && chmod -R g+rwX /etc
+RUN chown admin:root /home/admin && chmod -R g+rwX /home/admin 
 #run container as admin
 USER admin
 

@@ -42,8 +42,13 @@ c.ConfigurableHTTPProxy.auth_token = config["ConfigurableHTTPProxy"]["auth_token
 # map users to af-hub user
 c.Authenticator.username_map = {
     u: 'guest' for u in json.loads(config["Authenticator"]["users"])}
-c.Authenticator.username_map.update({u: u.replace(' ', '').replace(
-    ',', '') for u in json.loads(config["Authenticator"]["admins"])})
+if config.getboolean("Authenticator", "own_home", fallback=False):
+    c.Authenticator.username_map.update({u: u.replace(' ', '').replace(
+        ',', '') for u in json.loads(config["Authenticator"]["admins"])})
+else:
+    c.Authenticator.username_map.update(
+        {u: 'admin' for u in json.loads(config["Authenticator"]["admins"])})
+
 
 # add sudospawner
 c.JupyterHub.spawner_class = 'sudospawner.SudoSpawner'
@@ -58,45 +63,34 @@ for var in os.environ:
     c.Spawner.env_keep.append(var)
 
 # c.LocalAuthenticator.create_system_users = True
+
+
 def my_script_hook(spawner):
     username = spawner.user.name
 
     if not path.exists(f"/home/{username}"):
-        
-        # try:
-        #     check_call(["sudo", "useradd", "-m", username, "-s", "/usr/bin/bash"])
-        #     check_call(["sudo", "usermod", "-aG", "root", username])
-        #     check_call(["sudo", "usermod", "-aG", "docker", username])
-        # except:
-        #     check_call(["sudo", "mkdir", "-p", f"/home/{username}"])
-        #     pass
-
-        
-        # check_call(["sudo", "cp", "/home/admin/.bashrc", f"/home/{username}/.bashrc"])
-        # check_call(["sudo", "cp", "/home/admin/.jupyterlab-proxy-gui-config.json", f"/home/{username}/.jupyterlab-proxy-gui-config.json"])
-
-        # check_call(["sudo", "chown", "-R", f"{username}:root", f"/home/{username}"])
-        # check_call(["sudo", "setfacl", "-Rm", f"u:{username}:rwX,d:u:{username}:rwX", f"/home/admin/workflow"])
-
-        # check_call(["sudo", "ln", "-s", "/home/admin/workflow", f"/home/{username}/workflow"])
 
         try:
-            check_call(["useradd", "-m", username, "-s", "/usr/bin/bash"])
-            check_call(["usermod", "-aG", "root", username])
-            check_call(["usermod", "-aG", "docker", username])
+            check_call(["sudo", "useradd", "-m",
+                       username, "-s", "/usr/bin/bash"])
+            check_call(["sudo", "usermod", "-aG", "root", username])
+            check_call(["sudo", "usermod", "-aG", "docker", username])
         except:
-            check_call(["mkdir", "-p", f"/home/{username}"])
+            check_call(["sudo", "mkdir", "-p", f"/home/{username}"])
             pass
 
-        
-        check_call(["cp", "/home/admin/.bashrc", f"/home/{username}/.bashrc"])
-        check_call(["cp", "/home/admin/.jupyterlab-proxy-gui-config.json", f"/home/{username}/.jupyterlab-proxy-gui-config.json"])
+        check_call(["sudo", "cp", "/home/admin/.bashrc",
+                   f"/home/{username}/.bashrc"])
+        check_call(["sudo", "cp", "/home/admin/.jupyterlab-proxy-gui-config.json",
+                   f"/home/{username}/.jupyterlab-proxy-gui-config.json"])
 
-        check_call(["chown", "-R", f"{username}:root", f"/home/{username}"])
-        check_call(["setfacl", "-Rm", f"u:{username}:rwX,d:u:{username}:rwX", f"/home/admin/workflow"])
+        check_call(
+            ["sudo", "chown", "-R", f"{username}:root", f"/home/{username}"])
+        check_call(["sudo", "setfacl", "-Rm",
+                   f"u:{username}:rwX,d:u:{username}:rwX", f"/home/admin/workflow"])
 
-        check_call(["ln", "-s", "/home/admin/workflow", f"/home/{username}/workflow"])        
-
+        check_call(["sudo", "ln", "-s", "/home/admin/workflow",
+                   f"/home/{username}/workflow"])
 
     if path.exists('/home/admin/workflow/setup.sh'):
         check_call(['/home/admin/workflow/setup.sh', username])
