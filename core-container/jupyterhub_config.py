@@ -51,7 +51,9 @@ else:
 
 
 # add sudospawner
-c.JupyterHub.spawner_class = 'sudospawner.SudoSpawner'
+if config.getboolean("Authenticator", "use_sudo", fallback=True):
+    c.JupyterHub.spawner_class = 'sudospawner.SudoSpawner'
+
 
 # setup ssl
 c.Spawner.default_url = '/lab'

@@ -87,8 +87,7 @@ RUN useradd -m admin -p admin -s /bin/bash --gid admin
 #add docker group and user
 RUN groupadd -g 991 docker \
     && usermod -aG docker admin && usermod -aG root admin
-#create the jupyter-lab config, note ad mapping is used to map ad users to admin
-COPY ./core-container/jupyterhub_config.py /jupyterhub_config.py
+
 
 
 #create guest user
@@ -119,10 +118,6 @@ RUN python setup.py build && pip install .
 COPY ./workflow /home/admin/workflow
 RUN chown -R admin:root /home/admin/workflow && chmod -R g+rwX /home/admin/workflow
 RUN ln -s /home/admin/workflow /home/guest/
-
-#add sudo spawner stuff
-COPY ./core-container/sudoers_addon /sudoers_addon
-RUN apt-get install sudo && pip install sudospawner && cat /sudoers_addon >> /etc/sudoers && usermod -aG sudo admin
 
 #install supervisord
 RUN apt -y install supervisor
@@ -155,7 +150,15 @@ RUN jupyter tensorboard enable --user
 # add config for jupyter-resource-usage
 COPY ./core-container/jupyter_notebook_config.py /home/admin/.jupyter/jupyter_notebook_config.py
 
-RUN chown admin:root /home/admin && chmod -R g+rwX /home/admin 
+#create the jupyter-lab config, note ad mapping is used to map ad users to admin
+COPY ./core-container/jupyterhub_config.py /jupyterhub_config.py
+
+#add sudo spawner stuff
+COPY ./core-container/sudoers_addon /sudoers_addon
+RUN apt-get install sudo && pip install sudospawner && cat /sudoers_addon >> /etc/sudoers && usermod -aG sudo admin
+RUN chown admin:root /home/admin && chmod -R g+rwX /home/admin && chmod -R g+rwX /run
+
+
 #run container as admin
 USER admin
 
