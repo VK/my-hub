@@ -86,7 +86,7 @@ RUN groupadd admin
 RUN useradd -m admin -p admin -s /bin/bash --gid admin
 #add docker group and user
 RUN groupadd -g 991 docker \
-    && usermod -aG docker admin root
+    && usermod -aG docker admin && usermod -aG root admin
 #create the jupyter-lab config, note ad mapping is used to map ad users to admin
 COPY ./core-container/jupyterhub_config.py /jupyterhub_config.py
 
