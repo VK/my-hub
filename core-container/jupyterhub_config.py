@@ -48,6 +48,8 @@ if config.getboolean("Authenticator", "own_home", fallback=False):
         ',', '') for u in json.loads(config["Authenticator"]["admins"])})
 else:
     admin_name = getpass.getuser()
+    if admin_name != "admin":
+        check_call(["ln", "-s", "/home/admin", f"/home/{admin_name}"])
     c.Authenticator.username_map.update(
         {u: admin_name for u in json.loads(config["Authenticator"]["admins"])})
 

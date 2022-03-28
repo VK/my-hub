@@ -156,7 +156,7 @@ COPY ./core-container/jupyterhub_config.py /jupyterhub_config.py
 #add sudo spawner stuff
 COPY ./core-container/sudoers_addon /sudoers_addon
 RUN apt-get install sudo && pip install sudospawner && cat /sudoers_addon >> /etc/sudoers && usermod -aG sudo admin
-RUN chown admin:root /home/admin && chmod -R g+rwX /home/admin && chmod -R g+rwX /run
+RUN chown admin:root /home/admin && chmod -R g+rwX /home/admin && chmod -R g+rwX /run && chmod -R g+rwX /home
 
 
 #run container as admin
