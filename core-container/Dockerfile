@@ -86,7 +86,7 @@ RUN groupadd admin
 RUN useradd -m admin -p admin -s /bin/bash --gid admin
 #add docker group and user
 RUN groupadd -g 991 docker \
-    && usermod -aG docker admin
+    && usermod -aG docker admin root
 #create the jupyter-lab config, note ad mapping is used to map ad users to admin
 COPY ./core-container/jupyterhub_config.py /jupyterhub_config.py
 
@@ -98,7 +98,7 @@ RUN useradd -m guest -p guest -s /bin/bash -u 1111 --gid admin
 RUN echo 'root:root' | chpasswd
 
 #admin will can the owner of jupyter to install addons as user
-RUN chown -R admin:admin /usr/local/share/jupyter
+RUN chown -R admin:root /usr/local/share/jupyter && chmod -R g+rwX /usr/local/share/jupyter
 
 #create startup scripts
 COPY ./core-container/run.sh /run.sh 
@@ -110,14 +110,14 @@ RUN chmod 777 /run.sh
 
 # install other stuff
 COPY ./xtensions /xtensions
-RUN chown -R admin:admin /xtensions
+RUN chown -R admin:root /xtensions && chmod -R g+rwX /xtensions
 WORKDIR /xtensions/python_af-hub
 RUN python setup.py build && pip install .
 
 
 # copy base workflow to home directory
 COPY ./workflow /home/admin/workflow
-RUN chown -R admin:admin /home/admin/workflow
+RUN chown -R admin:root /home/admin/workflow && chmod -R g+rwX /home/admin/workflow
 RUN ln -s /home/admin/workflow /home/guest/
 
 #add sudo spawner stuff
@@ -132,7 +132,7 @@ COPY ./core-container/supervisord.conf /etc/supervisor/supervisord.conf
 RUN pip install apache-airflow==2.2.4 flask_bcrypt dtale SQLAlchemy==1.4.32
 
 #make a run directory
-RUN mkdir  /jupyterhub && chown admin:admin /jupyterhub && chmod 0700 /jupyterhub
+RUN mkdir  /jupyterhub && chown admin:root /jupyterhub && chmod 0700 /jupyterhub && chmod -R g+rwX /jupyterhub
 WORKDIR /jupyterhub
 RUN apt install -y libcurl4-openssl-dev libssl-dev && pip install psutil pycurl
 RUN pip install pip install PyJWT==2.0.0
