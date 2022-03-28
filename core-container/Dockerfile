@@ -140,8 +140,7 @@ RUN pip install pip install PyJWT==2.0.0
 # add acl
 RUN apt-get -y install acl 
 
-#run container as admin
-USER admin
+
 
 #init airflow configuration as user
 RUN mkdir -p /home/admin/airflow/
@@ -156,7 +155,9 @@ RUN jupyter tensorboard enable --user
 # add config for jupyter-resource-usage
 COPY ./core-container/jupyter_notebook_config.py /home/admin/.jupyter/jupyter_notebook_config.py
 
-
+RUN chown admin:root /home/admin && chmod -R g+rwX /home/admin && chmod -R g+rwX /etc
+#run container as admin
+USER admin
 
 EXPOSE 5050 5051 4040 4041
 
