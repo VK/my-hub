@@ -1,0 +1,26 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: hub-service
+  namespace: default
+  labels:
+    io.kompose.service: hub
+spec:
+  ports:
+    - protocol: TCP
+      port: 9950
+      targetPort: 8000
+  selector:
+    io.kompose.service: hub
+  type: LoadBalancer
+  sessionAffinity: None
+  externalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  allocateLoadBalancerNodePorts: true
+  internalTrafficPolicy: Cluster
+status:
+  loadBalancer:
+    ingress:
+      - hostname: localhost

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mongo-express
+  name: mongo-express
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mongo-express
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: mongo-express
+    spec:
+      containers:
+        - env:
+            - name: ME_CONFIG_SITE_BASEURL
+              value: /user/admin/mongo
+          image: mongo-express
+          name: mongo-express
+          resources: {}
+      restartPolicy: Always
+status: {}
