@@ -159,6 +159,15 @@ RUN apt-get install sudo && pip install sudospawner && cat /sudoers_addon >> /et
 RUN chown admin:root /home/admin && chmod -R g+rwX /home/admin && chmod -R g+rwX /run && chmod -R g+rwX /home
 
 
+# add kubernetes stuff
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
+    && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
+    && rm kubectl \
+    && wget https://get.helm.sh/helm-v3.8.1-linux-amd64.tar.gz \
+    && tar xvf helm-v3.8.1-linux-amd64.tar.gz \
+    && install -o root -g root -m 0755 linux-amd64/helm /usr/local/bin/helm \
+    && rm -rf linux-amd64
+
 #run container as admin
 USER admin
 

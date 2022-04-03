@@ -41,4 +41,4 @@ wtforms==2.3.3
 Markdown==3.3.4
 mixturemapping
 mongodf
-
+kubernetes
