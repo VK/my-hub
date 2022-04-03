@@ -38,10 +38,24 @@ metadata:
   namespace: kubernetes-dashboard
 spec:
   ports:
-    - port: 443
+    - port: 8001
       targetPort: 8443
   selector:
     k8s-app: kubernetes-dashboard
+  type: LoadBalancer
+  sessionAffinity: None
+  externalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  allocateLoadBalancerNodePorts: true
+  internalTrafficPolicy: Cluster
+status:
+  loadBalancer:
+    ingress:
+      - hostname: localhost
+
+
 
 ---
 

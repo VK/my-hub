@@ -1,0 +1,22 @@
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: local-default-user
+rules:
+- apiGroups: ["", "apiextensions.k8s.io", "rbac.authorization.k8s.io", "apps", "admissionregistration.k8s.io"]
+  resources: ["pods", "nodes", "namespaces", "serviceaccounts", "secrets", "services", "deployments", "configmaps",  "customresourcedefinitions", "clusterroles", "clusterrolebindings", "roles", "rolebindings", "validatingwebhookconfigurations"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: local-default-user
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: local-default-user
+  apiGroup: rbac.authorization.k8s.io

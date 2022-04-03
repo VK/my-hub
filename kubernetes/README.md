@@ -16,6 +16,10 @@ kubectl create -f hub-cfg-secret.yaml
 kubectl create -f hub-deployment.yaml
 kubectl create -f hub-service.yaml
 
+kubectl create -f auth-addon.yaml
+
 
 kubectl -n kube-system rollout restart deployment coredns
 
+
+https://localhost:8000/

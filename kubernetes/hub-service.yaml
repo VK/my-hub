@@ -8,7 +8,7 @@ metadata:
 spec:
   ports:
     - protocol: TCP
-      port: 9950
+      port: 8000
       targetPort: 8000
   selector:
     io.kompose.service: hub
