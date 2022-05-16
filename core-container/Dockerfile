@@ -168,6 +168,11 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
     && install -o root -g root -m 0755 linux-amd64/helm /usr/local/bin/helm \
     && rm -rf linux-amd64
 
+# add mongodump
+RUN cd /tmp && wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-debian10-x86_64-100.5.2.deb \
+    && dpkg -i mongodb-database-tools-debian10-x86_64-100.5.2.deb \ 
+    && rm -f mongodb-database-tools-debian10-x86_64-100.5.2.deb
+
 #run container as admin
 USER admin
 
