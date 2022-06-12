@@ -52,6 +52,7 @@ RUN pip install git+https://github.com/cliffwoolley/jupyter_tensorboard.git \
     && pip install git+https://github.com/chaoleili/jupyterlab_tensorboard.git
 
 # install git jupyterlab-latex
+RUN pip install jupyterlab_latex
 # RUN cd / \
 #     && git clone https://github.com/joequant/jupyterlab-latex.git \
 #     && cd jupyterlab-latex \
@@ -66,7 +67,8 @@ RUN pip install git+https://github.com/cliffwoolley/jupyter_tensorboard.git \
 # add latex jupyter-lsp support
 RUN apt-get install -y chktex \
     && cd /tmp \
-    && wget -q https://github.com/latex-lsp/texlab/releases/download/v2.2.2/texlab-x86_64-linux.tar.gz \
+    #&& wget -q https://github.com/latex-lsp/texlab/releases/download/v2.2.2/texlab-x86_64-linux.tar.gz \
+    && wget -q https://github.com/latex-lsp/texlab/releases/download/v4.0.0/texlab-x86_64-linux.tar.gz \
     && tar -xzvf texlab-x86_64-linux.tar.gz \
     && cp ./texlab /usr/bin/ \
     && rm -rf texlab* \

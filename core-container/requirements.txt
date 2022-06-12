@@ -42,3 +42,6 @@ Markdown==3.3.4
 mixturemapping
 mongodf
 kubernetes
+auto-sklearn
+dash_express_components
+dash_luckysheet
