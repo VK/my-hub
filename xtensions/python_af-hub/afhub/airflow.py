@@ -1,3 +1,4 @@
+from kubernetes.client import models as k8s
 from . import databricks
 from airflow.exceptions import AirflowException
 from airflow.models import BaseOperator, SkipMixin
@@ -16,11 +17,121 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import textwrap
 
+from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import (
+    KubernetesPodOperator,
+)
 
 # import config file
 import configparser
 config = configparser.ConfigParser()
 config.read('/defaults.cfg')
+
+
+def common_write_mail(self, outputFileName):
+
+    # skip mailing if it is not the last retry
+    if self.ti.max_tries >= self.ti.try_number:
+        return
+
+    try:
+        print("Render HTML")
+        os.system(
+            "jupyter nbconvert --to HTML --no-input {0}".format(outputFileName))
+    except:
+        print("Render failed")
+        pass
+
+    try:
+        print("Write Mails")
+        # get all mail parameters
+        server = smtplib.SMTP(config["Airflow"]["smtp"])
+        serverMail = config["Airflow"]["fromMail"]
+        toMail = config["Airflow"]["toMail"]
+        toMail = [m.replace(" ", "") for m in toMail.split(",")]
+
+        # add special users from aiflow call
+        if hasattr(self, 'email') and self.email != None:
+            toMail.extend([m.replace(" ", "")
+                           for m in self.email.split(",")])
+
+        # start to send the mails
+        m = toMail[0]
+
+        msg = MIMEMultipart()
+        msg['Subject'] = 'Notebook Exec Error'
+        msg['From'] = serverMail
+        msg['To'] = m
+        msg['Cc'] = ", ".join([tm for tm in toMail if tm != m])
+
+        text = "Hi!\nThe PapermillOperator of {} raised an exception".format(
+            self.inputFile)
+        part1 = MIMEText(text, 'plain')
+        msg.attach(part1)
+
+        try:
+            with open(os.path.splitext(outputFileName)[0]+'.html', 'r') as file:
+                html = file.read()
+            part2 = MIMEText(html, 'html')
+            msg.attach(part2)
+        except:
+            pass
+
+        server.sendmail(serverMail, toMail, msg.as_string())
+    except:
+        print("Error writing mails")
+
+
+def common_execute(self, context):
+    self.runDate = context['execution_date']
+    self.dagName = context['dag'].dag_id
+    self.dagfolder = context['dag'].folder
+    self.ti = context['ti']
+    self.dagrun = self.ti.get_dagrun()
+    self.parameters["conf"] = json.dumps(self.dagrun.conf)
+
+    outputFileName = os.path.join(
+        "/home/admin/workflow/output", self.dagName, self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
+    workingDir = os.path.dirname(outputFileName)
+
+    self.parameters["workflow"] = json.dumps({
+        "dagBase": "/home/admin/workflow/dags",
+        "dagFolder": self.dagfolder,
+        "workingDir": workingDir,
+        "fileStore": "/home/admin/workflow/FileStore"
+    })
+
+    return_value = self.execute_callable()
+    self.log.info("Done. Returned value was: %s", return_value)
+    return return_value
+
+
+def common_execute_callable(self, prepare_only=False):
+    outputFileName = os.path.join(
+        "/home/admin/workflow/output", self.dagName, self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
+    workingDir = os.path.dirname(outputFileName)
+
+    res = {}
+
+    if not os.path.isdir(workingDir):
+        os.makedirs(workingDir)
+
+    try:
+        res = pm.execute_notebook(
+            os.path.join(self.dagfolder, self.inputFile),
+            os.path.join("/home/admin/workflow/output",
+                         self.dagName,
+                         self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile),
+            cwd=workingDir,
+            parameters=self.parameters,
+            prepare_only=prepare_only
+        )
+    except Exception as ex:
+
+        common_write_mail(self, outputFileName)
+
+        raise ex
+
+    return res
 
 
 class PapermillOperator(BaseOperator):
@@ -72,108 +183,100 @@ class PapermillOperator(BaseOperator):
         }
 
     def execute(self, context):
-        self.runDate = context['execution_date']
-        self.dagName = context['dag'].dag_id
-        self.dagfolder = context['dag'].folder
-        self.ti = context['ti']
-        self.dagrun = self.ti.get_dagrun()
-        self.parameters["conf"] = json.dumps(self.dagrun.conf)
-
-        outputFileName = os.path.join(
-            "/home/admin/workflow/output", self.dagName, self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
-        workingDir = os.path.dirname(outputFileName)
-
-        self.parameters["workflow"] = json.dumps({
-            "dagBase": "/home/admin/workflow/dags",
-            "dagFolder": self.dagfolder,
-            "workingDir": workingDir,
-            "fileStore": "/home/admin/workflow/FileStore"
-        })
-
-        return_value = self.execute_callable()
-        self.log.info("Done. Returned value was: %s", return_value)
-        return return_value
+        return common_execute(self, context)
 
     def execute_callable(self):
+        return common_execute_callable(self, prepare_only=False)
+
+
+
+class PapermillOperatorK8s(KubernetesPodOperator):
+    """
+
+    Executes a Jupyter Notebook with papermill in a kubernetes worker.
+
+    Attributes
+    ----------
+    inputFile : str
+        the input Jupyter Notebook
+    outputFile : str
+        the output Jupyter Notebook
+    parameters : dict
+        additional parameters for the run
+    image : str
+        the container image you want to use
+    namespace: str
+        the namespace you want to run in
+    name : str
+        name of the worker container
+    """
+
+    template_ext = tuple()
+    ui_color = '#a9b7ff'
+
+    def __init__(
+            self,
+            inputFile,
+            outputFile,
+            parameters={},
+            op_args=None,
+            op_kwargs=None,
+            *args, **kwargs):
+
+        if "image" not in kwargs:
+            kwargs["image"] = config["Airflow"]["image"]
+        if "name" not in kwargs:
+            kwargs["name"] = "airflow-" + kwargs["task_id"]
+        if "namespace" not in kwargs:
+            kwargs["namespace"] = config["Airflow"]["namespace"]
+        kwargs["do_xcom_push"] = False
+
+        kwargs["volume_mounts"] = [
+            k8s.V1VolumeMount(mount_path='/home/admin/workflow/output', name='output-data', sub_path=None, read_only=False)
+        ]
+        kwargs["volumes"] = [k8s.V1Volume(
+            name='output-data',
+            persistent_volume_claim=k8s.V1PersistentVolumeClaimVolumeSource(claim_name='output-data'),
+        )]
+
+        kwargs["cmds"] = ["bash", "-cx"]
+        kwargs["arguments"] = []
+        
+        super(PapermillOperatorK8s, self).__init__(*args, **kwargs)
+
+        self.inputFile = inputFile
+        self.outputFile = outputFile
+
+        self.parameters = {
+            "params": json.dumps(parameters)
+        }
+
+    def execute_callable(self):
+        return common_execute_callable(self, prepare_only=True)
+
+    def execute(self, context):
+        return_value = common_execute(self, context)
+
         outputFileName = os.path.join(
             "/home/admin/workflow/output", self.dagName, self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
         workingDir = os.path.dirname(outputFileName)
 
-        res = {}
-
-        if not os.path.isdir(workingDir):
-            os.makedirs(workingDir)
+        self.cmds = ["bash", "-cx", f"cd {workingDir} && papermill {outputFileName}" ]
 
         try:
-            res = pm.execute_notebook(
-                os.path.join(self.dagfolder, self.inputFile),
-                os.path.join("/home/admin/workflow/output",
-                             self.dagName,
-                             self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile),
-                cwd=workingDir,
-                parameters=self.parameters
-            )
+            return_value = KubernetesPodOperator.execute(self, context)
         except Exception as ex:
-
-            # skip mailing if it is not the last retry
-            if self.ti.max_tries >= self.ti.try_number:
-                raise ex
-
-            try:
-                print("Render HTML")
-                os.system(
-                    "jupyter nbconvert --to HTML --no-input {0}".format(outputFileName))
-            except:
-                print("Render failed")
-                pass
-
-            try:
-                print("Write Mails")
-                # get all mail parameters
-                server = smtplib.SMTP(config["Airflow"]["smtp"])
-                serverMail = config["Airflow"]["fromMail"]
-                toMail = config["Airflow"]["toMail"]
-                toMail = [m.replace(" ", "") for m in toMail.split(",")]
-
-                # add special users from aiflow call
-                if hasattr(self, 'email') and self.email != None:
-                    toMail.extend([m.replace(" ", "")
-                                   for m in self.email.split(",")])
-
-                # start to send the mails
-                m = toMail[0]
-
-                msg = MIMEMultipart()
-                msg['Subject'] = 'Notebook Exec Error'
-                msg['From'] = serverMail
-                msg['To'] = m
-                msg['Cc'] = ", ".join([tm for tm in toMail if tm != m])
-
-                text = "Hi!\nThe PapermillOperator of {} raised an exception".format(
-                    self.inputFile)
-                part1 = MIMEText(text, 'plain')
-                msg.attach(part1)
-
-                try:
-                    with open(os.path.splitext(outputFileName)[0]+'.html', 'r') as file:
-                        html = file.read()
-                    part2 = MIMEText(html, 'html')
-                    msg.attach(part2)
-                except:
-                    pass
-
-                server.sendmail(serverMail, toMail, msg.as_string())
-            except:
-                print("Error writing mails")
+            common_write_mail(self, outputFileName)
 
             raise ex
 
-        return res
+        return return_value
+
 
 
 class LibraryOperator(BaseOperator):
     """
-    
+
     Create libraries for local use and databricks
 
     Attributes
@@ -608,7 +711,6 @@ class DownloadFromDatabricks(BaseOperator):
         return {}
 
 
-
 class RetryTaskGroup(TaskGroup):
     """
     A collection of tasks based on the airflow.utils.task_group.TaskGroup.
@@ -675,7 +777,8 @@ class RetryTaskGroup(TaskGroup):
             for key, task in self.children.items():
                 print(key)
                 try:
-                    task.clear(start_date=context['execution_date'], end_date=context['execution_date'])
+                    task.clear(
+                        start_date=context['execution_date'], end_date=context['execution_date'])
                 except:
                     pass
 

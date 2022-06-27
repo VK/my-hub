@@ -126,7 +126,11 @@ RUN apt -y install supervisor
 COPY ./core-container/supervisord.conf /etc/supervisor/supervisord.conf
 
 #install airflow
-RUN pip install apache-airflow==2.2.4 flask_bcrypt dtale SQLAlchemy==1.4.32
+# RUN pip install apache-airflow==2.2.4 flask_bcrypt dtale SQLAlchemy==1.4.32
+RUN pip install apache-airflow==2.3.2 flask_bcrypt dtale SQLAlchemy==1.4.9 apache-airflow-providers-cncf-kubernetes
+# crude fix local_task nested pidsls
+RUN sed -i 's/same_process = recorded_pid == current_pid/same_process = True/g' /usr/local/lib/python3.8/dist-packages/airflow/jobs/local_task_job.py
+
 
 #make a run directory
 RUN mkdir  /jupyterhub && chown admin:root /jupyterhub && chmod 0700 /jupyterhub && chmod -R g+rwX /jupyterhub

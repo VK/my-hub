@@ -26,7 +26,7 @@ spec:
               value: '/home/admin/airflow'  
             - name: HOME
               value: '/home/admin'                  
-          image: vikru/my-hub:v2.8.0-rc2
+          image: vikru/my-hub
           name: my-hub
           ports:
             - containerPort: 8000
@@ -40,11 +40,17 @@ spec:
               subPath: key
             - mountPath: "/defaults.cfg"
               name: hub-cfg
-              subPath: cfg           
+              subPath: cfg  
+            - mountPath: "/home/admin/workflow/output"           
+              name: output-data
       restartPolicy: Always
       volumes:
         - name: hub-cfg
           secret:
             secretName: hub-cfg
+        - name: output-data
+          persistentVolumeClaim:
+            claimName: output-data
+
 
 status: {}
