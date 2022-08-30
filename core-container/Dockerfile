@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.8.0-jupyter
+FROM tensorflow/tensorflow:2.10.0rc3-jupyter
 
 
 #install nodejs
