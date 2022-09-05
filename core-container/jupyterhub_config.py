@@ -74,7 +74,14 @@ for var in os.environ:
 def my_script_hook(spawner):
     username = spawner.user.name
 
-    if not path.exists(f"/home/{username}"):
+    try:
+        pwd.getpwnam(username)
+        user_exists = True
+    except KeyError:
+        print(f'User {username} does not exist.')
+        user_exists = False
+
+    if not user_exists:
 
         try:
             check_call(["sudo", "useradd", "-m",
