@@ -21,10 +21,11 @@ Pillow
 papermill
 nbclient
 tensorflow-probability==0.16.0
+tensorflow_addons==0.17.1
 psycopg2-binary
 docker
 nltk
-mlflow==1.24.0
+mlflow==1.28.0
 pypc
 hyperopt
 pyarrow
