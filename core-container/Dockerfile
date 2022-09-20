@@ -5,7 +5,7 @@ FROM tensorflow/tensorflow:2.8.0-jupyter
 RUN apt-get -y update \
     && apt-get install -y --no-install-recommends apt-utils \
     && curl -sL https://deb.nodesource.com/setup_14.x | bash - \
-    && apt-get install -y nodejs iputils-ping ssh nano
+    && apt-get install -y nodejs iputils-ping ssh nano sshpass
 
 #update pip
 #RUN pip install --upgrade pip
