@@ -33,6 +33,8 @@ xlwt
 graphviz
 psutil
 bs4
+eureka_requests
+
 xlrd
 msal
 fastapi
