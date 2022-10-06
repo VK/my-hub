@@ -43,7 +43,7 @@ tables
 wtforms==2.3.3
 Markdown==3.3.4
 mixturemapping
-mongodf>=0.0.25
+mongodf>=0.0.26
 kubernetes
 auto-sklearn
 dash_express_components
