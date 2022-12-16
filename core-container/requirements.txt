@@ -48,3 +48,7 @@ kubernetes
 auto-sklearn
 dash_express_components
 dash_luckysheet
+color-science
+azure-storage-file-datalake
+azure-identity
+

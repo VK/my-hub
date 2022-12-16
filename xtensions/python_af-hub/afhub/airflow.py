@@ -21,6 +21,8 @@ from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import (
     KubernetesPodOperator,
 )
 
+
+
 # import config file
 import configparser
 config = configparser.ConfigParser()
@@ -794,3 +796,167 @@ class RetryTaskGroup(TaskGroup):
     def __exit__(self, _type, _value, _tb):
         self.dag.default_args = self.old_args
         super(RetryTaskGroup, self).__exit__(_type, _value, _tb)
+
+
+
+
+
+
+
+
+def get_fileApi():
+    
+    import eureka_requests
+
+    import nest_asyncio
+    nest_asyncio.apply()    
+    
+    import configparser
+    config = configparser.ConfigParser()
+    config.read('/defaults.cfg')
+
+    url = config["VKfileapi"]["url"]
+    token = config["VKfileapi"]["token"]
+
+    fileApi = eureka_requests.RequestsApi(
+        "FILE-SERVE-AZ",
+        ":".join(url.split(":")[0:-1])+":8761",
+        token
+    )
+    
+    return fileApi
+
+
+
+class UploadToAzure(BaseOperator):
+    """
+    Copy a file or more from the local filesystem to the Azure Blob Store
+    """
+    template_fields = ('templates_dict',)
+    template_ext = tuple()
+    ui_color = '#a8c5ff'
+
+    # since we won't mutate the arguments, we should just do the shallow copy
+    # there are some cases we can't deepcopy the objects(e.g protobuf).
+    shallow_copy_attrs = ('python_callable', 'op_kwargs',)
+
+    @apply_defaults
+    def __init__(
+            self,
+            inputFile,
+            outputFolder,
+            location="sandbox",
+            op_args=None,
+            op_kwargs=None,
+            templates_dict=None,
+            templates_exts=None,
+            *args, **kwargs):
+        super(UploadToAzure, self).__init__(*args, **kwargs)
+        self.op_args = op_args or []
+        self.op_kwargs = op_kwargs or {}
+        self.templates_dict = templates_dict
+        if templates_exts:
+            self.template_ext = templates_exts
+
+        self.inputFile = inputFile if isinstance(inputFile, list) else [inputFile]
+        self.outputFolder = outputFolder
+        self.location = location
+
+    def execute(self, context):
+        return_value = self.execute_callable()
+        self.log.info("Done. Returned value was: %s", return_value)
+        return return_value
+
+    def execute_callable(self):
+
+        fileApi = get_fileApi()
+        
+        output = {}
+        error = False
+           
+        for el in self.inputFile:
+            filename = os.path.join(self.outputFolder, os.path.basename(el))
+            
+            res = fileApi.post(f"{self.location}/upload?filename={filename}", 
+                               files={"file": open(el, "rb")}
+                              )
+            if res.ok:
+                
+                message = res.json()["message"]
+                if message.startswith("Save"):
+                    output[el] = "OK"
+                else:
+                    output[el] = message
+                    error = True
+            else:
+                output[el] = "Error"
+                error = True
+ 
+
+        if error:
+            raise Exception(json.dumps(output))
+            
+        return output
+
+
+class DownloadFromAzure(BaseOperator):
+    """
+    Copy a file or more from  Azure to the local machine
+    """
+    template_fields = ('templates_dict',)
+    template_ext = tuple()
+    ui_color = '#899fcc'
+
+    # since we won't mutate the arguments, we should just do the shallow copy
+    # there are some cases we can't deepcopy the objects(e.g protobuf).
+    shallow_copy_attrs = ('python_callable', 'op_kwargs',)
+
+    @apply_defaults
+    def __init__(
+            self,
+            inputFile,
+            outputFolder,
+            location="sandbox",
+            op_args=None,
+            op_kwargs=None,
+            templates_dict=None,
+            templates_exts=None,
+            *args, **kwargs):
+        super(DownloadFromAzure, self).__init__(*args, **kwargs)
+        self.op_args = op_args or []
+        self.op_kwargs = op_kwargs or {}
+        self.templates_dict = templates_dict
+        if templates_exts:
+            self.template_ext = templates_exts
+
+        self.inputFile = inputFile if isinstance(inputFile, list) else [inputFile]
+        self.outputFolder = outputFolder
+        self.location=location
+
+    def execute(self, context):
+        return_value = self.execute_callable()
+        self.log.info("Done. Returned value was: %s", return_value)
+        return return_value
+
+    def execute_callable(self):
+
+        fileApi = get_fileApi()
+        
+        output = {}
+        error = False
+           
+        for el in self.inputFile:
+            filename = os.path.basename(el)
+            res = fileApi.post(f"{self.location}/load", json={"filename": el})
+            if res.ok:
+                with open(os.path.join(self.outputFolder, filename), "wb") as f:
+                    f.write(res.content)
+                    
+                output[el] = "OK"
+            else:
+                output[el] = "Error"
+                error = True
+                
+        if error:
+            raise Exception(json.dumps(output))
+        return output
