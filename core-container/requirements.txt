@@ -43,12 +43,11 @@ tables
 wtforms==2.3.3
 Markdown==3.3.4
 mixturemapping
-mongodf>=0.0.26
+mongodf
 kubernetes
 auto-sklearn
 dash_express_components
 dash_luckysheet
-color-science
 azure-storage-file-datalake
 azure-identity
 
