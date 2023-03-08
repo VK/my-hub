@@ -28,7 +28,7 @@ COPY ./configurable-http-proxy/lib/configproxy.js \
 
 #install jupyter lab extensions
 RUN pip install jupyterlab-git \
-    # && pip install --pre jupyter-tensorboard \
+    && pip install jupyterhub-idle-culler \
     # && jupyter tensorboard enable \
     && pip install ipympl \
     && jupyter labextension install jupyterlab-plotly --no-build \

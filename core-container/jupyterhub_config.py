@@ -1,3 +1,4 @@
+import sys
 from subprocess import check_call
 import getpass
 import json
@@ -5,7 +6,6 @@ import configparser
 import os
 from os import path
 import pwd
-import grp
 
 
 c.Application.log_level = 'DEBUG'
@@ -58,6 +58,33 @@ else:
 if config.getboolean("Authenticator", "use_sudo", fallback=True):
     c.JupyterHub.spawner_class = 'sudospawner.SudoSpawner'
 
+
+# culling
+c.JupyterHub.load_roles = [
+    {
+        "name": "jupyterhub-idle-culler-role",
+        "scopes": [
+            "list:users",
+            "read:users:activity",
+            "read:servers",
+            "delete:servers",
+            # "admin:users", # if using --cull-users
+        ],
+        # assignment of role's permissions to:
+        "services": ["jupyterhub-idle-culler-service"],
+    }
+]
+culling_timeout = config.getint("Authenticator", "culling_timeout", fallback=3600)
+c.JupyterHub.services = [
+    {
+        "name": "jupyterhub-idle-culler-service",
+        "command": [
+            sys.executable,
+            "-m", "jupyterhub_idle_culler",
+            f"--timeout={culling_timeout}",
+        ]
+    }
+]
 
 # setup ssl
 c.Spawner.default_url = '/lab'
