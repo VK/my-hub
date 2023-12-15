@@ -25,7 +25,7 @@ tensorflow_addons==0.17.1
 psycopg2-binary
 docker
 nltk
-mlflow==1.28.0
+mlflow==2.9.2
 pypc
 hyperopt
 pyarrow
