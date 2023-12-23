@@ -3,6 +3,8 @@ version: "3.2"
 services:
 
   my-hub:
+    # image: vikru/my-hub:v2.8.0-rc5
+    # image: vikru/my-hub:v2.8.0-rc10
     image: vikru/my-hub
     restart: always
     ports:
@@ -14,6 +16,7 @@ services:
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock
       - mlflow:/home/admin/mlflow
+      - /mnt/d/HighResolution:/home/admin/HighResolution
     secrets:
       - source: server.crt
         target: /cer.pem
@@ -21,8 +24,7 @@ services:
         target: /key.pem
       - source: hub.cfg
         target: /defaults.cfg
-    depends_on:
-      - "postgres"
+
 
 
 

@@ -1,10 +1,11 @@
-FROM tensorflow/tensorflow:2.8.0-jupyter
+#FROM tensorflow/tensorflow:2.8.0-jupyter
+FROM tensorflow/tensorflow:2.15.0-jupyter
 
 
 #install nodejs
 RUN apt-get -y update \
     && apt-get install -y --no-install-recommends apt-utils \
-    && curl -sL https://deb.nodesource.com/setup_14.x | bash - \
+    && curl -sL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs iputils-ping ssh nano sshpass
 
 #update pip
@@ -12,11 +13,12 @@ RUN apt-get -y update \
 
 #install python requirements
 COPY ./core-container/requirements.txt /requirements.txt
+RUN pip install Cython && pip install scikit-learn --no-build-isolation 
 RUN pip install -r /requirements.txt
 
 
 #install jupyterhub
-RUN pip install jupyterlab==3.2.9 jupyterhub \
+RUN pip install jupyterlab==4.0.9 jupyterhub \
     && npm install -g configurable-http-proxy \
     && pip install oauthenticator PyJWT
 
@@ -40,7 +42,7 @@ RUN pip install jupyterlab-git \
     #&& pip install jupyterlab_latex \
     && DEBIAN_FRONTEND=noninteractive apt install -yq texlive-xetex texlive-latex-extra fontconfig texlive-lang-german \
     # && jupyter labextension install @jupyterlab/latex  --no-build \  #wait for jupyterlab 3.0
-    && pip install jupyter-lsp python-language-server[all] \
+    && pip install jupyter-lsp jedi-language-server \
     && jupyter labextension install @krassowski/jupyterlab-lsp --no-build \
     #&& pip install jupyter-resource-usage jupyterlab-topbar jupyterlab-system-monitor \
     && pip install xeus-python \
@@ -127,9 +129,9 @@ COPY ./core-container/supervisord.conf /etc/supervisor/supervisord.conf
 
 #install airflow
 # RUN pip install apache-airflow==2.2.4 flask_bcrypt dtale SQLAlchemy==1.4.32
-RUN pip install apache-airflow==2.3.2 flask_bcrypt dtale SQLAlchemy==1.4.9 apache-airflow-providers-cncf-kubernetes
+RUN pip install sqlalchemy==1.4.49 apache-airflow==2.6.0 Pydantic==1.10.13 jinja2==3.1.1 flask_bcrypt dtale apache-airflow-providers-cncf-kubernetes
 # crude fix local_task nested pidsls
-RUN sed -i 's/same_process = recorded_pid == current_pid/same_process = True/g' /usr/local/lib/python3.8/dist-packages/airflow/jobs/local_task_job.py
+# RUN sed -i 's/same_process = recorded_pid == current_pid/same_process = True/g' /usr/local/lib/python3.8/dist-packages/airflow/jobs/local_task_job.py
 
 
 #make a run directory

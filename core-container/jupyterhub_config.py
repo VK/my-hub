@@ -54,6 +54,11 @@ else:
         {u: admin_name for u in json.loads(config["Authenticator"]["admins"])})
 
 
+c.Authenticator.allowed_users = set(
+    ['guest', 'admin', *json.loads(config.get("Authenticator", "admins", fallback="[]"))]
+)
+ 
+
 # add sudospawner
 if config.getboolean("Authenticator", "use_sudo", fallback=True):
     c.JupyterHub.spawner_class = 'sudospawner.SudoSpawner'
