@@ -20,7 +20,7 @@ RUN pip install Cython && pip install scikit-learn --no-build-isolation
 RUN pip install -r /requirements.txt
 
 #install jupyter lab extensions
-RUN pip install jupyterlab-git \
+RUN pip install jupyterlab-git==0.42.0 \
     && pip install jupyterhub-idle-culler \
     # && jupyter tensorboard enable \
     && pip install ipympl \

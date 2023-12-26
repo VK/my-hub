@@ -12,6 +12,7 @@ import papermill as pm
 import os
 import smtplib
 import json
+import json5
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -107,6 +108,40 @@ def common_execute(self, context):
     return return_value
 
 
+
+
+def custom_json_decoder(content):
+    try:
+        return json5.loads(content)
+    except json5.JSONDecodeError:
+        return content
+
+def extract_result(self, res):
+    
+    if "cells" not in res:
+        self.log.info("No celles returned")
+        return None
+
+    last_cell_output = [c for c in res["cells"] if len(c["outputs"]) > 0][-1]["outputs"]
+    if last_cell_output:
+        # If the last cell has outputs, extract the result
+        last_output = last_cell_output[-1]
+        if 'data' in last_output and 'application/json' in last_output['data']:
+            # Extract the JSON data if available
+            self.log.info("Parse application/json")
+            return custom_json_decoder(last_output['data']['application/json'])
+        if 'data' in last_output and 'text/plain' in last_output['data']:
+            # Extract the JSON data if available
+            self.log.info("Parse text/plain")
+            return custom_json_decoder(last_output['data']['text/plain'])
+        else:
+            self.log.info("Parse ???")
+            # Return the output as string
+            return last_output
+    else:
+        # No output in the last cell
+        return None
+
 def common_execute_callable(self, prepare_only=False):
     outputFileName = os.path.join(
         "/home/admin/workflow/output", self.dagName, self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
@@ -118,7 +153,7 @@ def common_execute_callable(self, prepare_only=False):
         os.makedirs(workingDir)
 
     try:
-        res = pm.execute_notebook(
+        inner_res = pm.execute_notebook(
             os.path.join(self.dagfolder, self.inputFile),
             os.path.join("/home/admin/workflow/output",
                          self.dagName,
@@ -127,6 +162,7 @@ def common_execute_callable(self, prepare_only=False):
             parameters=self.parameters,
             prepare_only=prepare_only
         )
+        res = extract_result(self, inner_res)
     except Exception as ex:
 
         common_write_mail(self, outputFileName)
@@ -960,3 +996,6 @@ class DownloadFromAzure(BaseOperator):
         if error:
             raise Exception(json.dumps(output))
         return output
+    
+    
+    
