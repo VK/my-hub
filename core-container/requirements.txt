@@ -51,3 +51,4 @@ dash_luckysheet
 azure-storage-file-datalake
 azure-identity
 
+fonttools>=4.43.0 # not directly required, pinned by Snyk to avoid a vulnerability
