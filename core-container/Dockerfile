@@ -1,41 +1,31 @@
 #FROM tensorflow/tensorflow:2.8.0-jupyter
-FROM tensorflow/tensorflow:2.15.0-jupyter
+FROM tensorflow/tensorflow:2.15.0-gpu-jupyter
 
 
 #install nodejs
 RUN apt-get -y update \
     && apt-get install -y --no-install-recommends apt-utils \
     && curl -sL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs iputils-ping ssh nano sshpass
-
-#update pip
-#RUN pip install --upgrade pip
-
-#install python requirements
-COPY ./core-container/requirements.txt /requirements.txt
-RUN pip install Cython && pip install scikit-learn --no-build-isolation 
-RUN pip install -r /requirements.txt
-
-
-#install jupyterhub
-RUN pip install jupyterlab==4.0.9 jupyterhub \
-    && npm install -g configurable-http-proxy \
-    && pip install oauthenticator PyJWT
+    && apt-get install -y nodejs iputils-ping ssh nano sshpass \
+    && npm install -g configurable-http-proxy
 
 #install updated configurable-http-proxy of jupyterhub
 #note only one file changed!
 COPY ./configurable-http-proxy/lib/configproxy.js \
     /usr/lib/node_modules/configurable-http-proxy/lib/configproxy.js
 
+#install python requirements
+COPY ./core-container/requirements.txt /requirements.txt
+RUN pip install Cython && pip install scikit-learn --no-build-isolation 
+RUN pip install -r /requirements.txt
 
 #install jupyter lab extensions
 RUN pip install jupyterlab-git \
     && pip install jupyterhub-idle-culler \
     # && jupyter tensorboard enable \
     && pip install ipympl \
-    && jupyter labextension install jupyterlab-plotly --no-build \
+    # && jupyter labextension install jupyterlab-plotly --no-build \ 
     && jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build \
-    #&& pip install jupyterlab-spreadsheet-editor jupyterlab-tabular-data-editor\
     && pip install jupyterlab-tabular-data-editor\
     && jupyter labextension install jupyterlab-chart-editor  --no-build \
     && pip install jupyterlab_proxy_gui \
@@ -45,7 +35,6 @@ RUN pip install jupyterlab-git \
     && pip install jupyter-lsp jedi-language-server \
     && jupyter labextension install @krassowski/jupyterlab-lsp --no-build \
     #&& pip install jupyter-resource-usage jupyterlab-topbar jupyterlab-system-monitor \
-    && pip install xeus-python \
     && echo "ENDE"
 
 
@@ -92,8 +81,6 @@ RUN useradd -m admin -p admin -s /bin/bash --gid admin
 RUN groupadd -g 991 docker \
     && usermod -aG docker admin && usermod -aG root admin
 
-
-
 #create guest user
 RUN useradd -m guest -p guest -s /bin/bash -u 1111 --gid admin
 
@@ -129,7 +116,7 @@ COPY ./core-container/supervisord.conf /etc/supervisor/supervisord.conf
 
 #install airflow
 # RUN pip install apache-airflow==2.2.4 flask_bcrypt dtale SQLAlchemy==1.4.32
-RUN pip install sqlalchemy==1.4.49 apache-airflow==2.6.0 Pydantic==1.10.13 jinja2==3.1.1 flask_bcrypt dtale apache-airflow-providers-cncf-kubernetes
+RUN pip install sqlalchemy==1.4.50 apache-airflow==2.8.0 Pydantic==2.5.3 jinja2==3.1.1 flask_bcrypt apache-airflow-providers-cncf-kubernetes pendulum==2.1.2 connexion==2.14.2
 # crude fix local_task nested pidsls
 # RUN sed -i 's/same_process = recorded_pid == current_pid/same_process = True/g' /usr/local/lib/python3.8/dist-packages/airflow/jobs/local_task_job.py
 
