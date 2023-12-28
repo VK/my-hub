@@ -50,4 +50,4 @@ dash_express_components
 dash_luckysheet
 azure-storage-file-datalake
 azure-identity
-
+shapely

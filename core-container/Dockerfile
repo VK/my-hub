@@ -168,6 +168,10 @@ RUN cd /tmp && wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-d
     && dpkg -i mongodb-database-tools-debian10-x86_64-100.5.2.deb \ 
     && rm -f mongodb-database-tools-debian10-x86_64-100.5.2.deb
 
+
+# fix airflow
+RUN sed -i "s/if recorded_pid is not None and not same_process and not IS_WINDOWS:/if False:/" /usr/local/lib/python3.11/dist-packages/airflow/jobs/local_task_job_runner.py
+
 #run container as admin
 USER admin
 
