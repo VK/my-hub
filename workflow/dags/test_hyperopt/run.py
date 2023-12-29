@@ -11,7 +11,7 @@ default_args = {
     'start_date':  datetime(2020, 4, 1),
 }
 
-dag = DAG('K8S', schedule_interval=None, default_args=default_args, catchup=False)
+dag = DAG('test_hyperopt', schedule_interval=None, default_args=default_args, catchup=False)
 
 
 
