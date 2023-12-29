@@ -17,6 +17,7 @@ COPY ./configurable-http-proxy/lib/configproxy.js \
 #install python requirements
 COPY ./core-container/requirements.txt /requirements.txt
 RUN pip install Cython && pip install scikit-learn --no-build-isolation 
+RUN apt-get install -y libxml2-dev libxslt-dev
 RUN pip install -r /requirements.txt
 
 #install jupyter lab extensions

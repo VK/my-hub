@@ -24,6 +24,13 @@ services:
         target: /key.pem
       - source: hub.cfg
         target: /defaults.cfg
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]        
 
 
 

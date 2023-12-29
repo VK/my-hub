@@ -40,32 +40,55 @@ from hyperopt import fmin, tpe, Trials, hp, FMinIter
 from hyperopt import atpe
 from hyperopt import Domain
 from hyperopt.early_stop import no_progress_loss
+import pickle
 
 class HyperoptTaskGroup(TaskGroup):
-    def __init__(self, space, algo=atpe.suggest, max_evals=100, min_evals=20, early_stopping=True, params={}, *args, **kwargs):
+    def __init__(self, space, algo=atpe.suggest, max_evals=100, min_evals=20, early_stopping=True, params={}, group_id="optimize", *args, **kwargs):
         self.space = space
         self.algo = algo
         self.max_evals = max_evals
         self.min_evals = min_evals
+        self.final_run = False
         
         self.trials = Trials()
 
         kwargs["ui_color"] = "#4fe51d"
         kwargs["ui_fgcolor"] = "#fff"
+        kwargs["group_id"] = group_id
 
         super().__init__(*args, **kwargs)
         
         if not self.default_args:
             self.default_args = {}
         self.default_args["params"] = params
+        
+        self.save_trials()
             
+    def save_trials(self):
+        logging.critical("load")
+        file_name = "/tmp/"+self.dag_id+"_"+self.group_id+".pkl"
+        with open(file_name, 'wb') as f:
+            pickle.dump(self.trials, f)
+        print(f"Trials saved to '{file_name}'")
+        logging.critical(self.trials.trials)
         
-        
-            
-        
-      
+    def load_trials(self):
+        logging.critical("load")
+        file_name = "/tmp/"+self.dag_id+"_"+self.group_id+".pkl"
+        try:
+            with open(file_name, 'rb') as f:
+                loaded_trials = pickle.load(f)
+                if isinstance(loaded_trials, Trials):
+                    self.trials = loaded_trials
+                    print(f"Trials loaded from '{file_name}'")
+                else:
+                    print(f"Error: '{file_name}' does not contain Trials object")
+        except FileNotFoundError:
+            print(f"Error: '{file_name}' not found")
+        logging.critical(self.trials._trials)
         
     def get_new_params(self):
+        self.load_trials()
         def _sample(parameters):
             return {"loss": 0.0 , "status": "ok"}
         
@@ -91,39 +114,61 @@ class HyperoptTaskGroup(TaskGroup):
                 show_progressbar=False
             )
         if len(self.trials) == new_max_evals:
+            logging.critical(self.trials.trials[-1])
+            
             res = self.trials.trials[-1]['misc']['vals']
+            self.save_trials()
             return {k: v[0] if isinstance(v, list) and len(v) == 1 else v for k,v in res.items()}
         else:
             return None
         
+    def update_last_loss(self, loss):    
+        self.load_trials()
+        logging.critical("fuck")
+        logging.critical(self.trials.trials)
+        self.trials.trials[-1]['result']['loss'] = loss
+        self.save_trials()
         
+    def update_last_loss_error(self):    
+        self.trials.trials[-1]['result']['status'] = 'error'        
 
     def init_op(self, *args, **kwargs):
-        task_logger.critical("init")
-        
         dag_run = kwargs["dag_run"]
-        
-        
-        
-        
-        
         
         new_params = self.get_new_params()
         self.default_args["params"].update(new_params)
-        
+        dag_run.conf = self.default_args["params"]
         
         for task in self.opti_tasks:
             task.parameters["params"] = self.default_args["params"]
-            dag_run.conf = self.default_args["params"]
-            task_logger.critical(task)
-            task_logger.critical(task.parameters)
-            
         
         return self.default_args["params"]
-        
-        
+
+    
     def exit_op(self, *args, **kwargs):
-        pass
+        dag_run = kwargs["dag_run"]
+        
+        if self.final_run:
+            return "END"
+        
+        
+        total_loss = 0.0
+        loss_found = False
+        for task in self.opti_leaves:
+            return_value = task.xcom_pull(task_ids=task.task_id, key='return_value', context=kwargs)
+            logging.critical(return_value)
+            if "loss" in return_value:
+                loss_value = return_value["loss"]
+                total_loss += loss_value
+                loss_found = True
+                
+        if not loss_found:
+            raise Exception("No loss found")
+            
+        self.update_last_loss(total_loss)
+        
+            
+        return total_loss
         
         
     def add(self, task: BaseOperator) -> None:

@@ -51,3 +51,4 @@ dash_luckysheet
 azure-storage-file-datalake
 azure-identity
 shapely
+lightgbm
