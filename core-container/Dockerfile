@@ -173,6 +173,11 @@ RUN cd /tmp && wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-d
 # fix airflow
 RUN sed -i "s/if recorded_pid is not None and not same_process and not IS_WINDOWS:/if False:/" /usr/local/lib/python3.11/dist-packages/airflow/jobs/local_task_job_runner.py
 
+# fix hyperopt mongo  replace "j=" with "journal=" 
+RUN sed -i 's/j=/journal=/g' /usr/local/lib/python3.11/dist-packages/hyperopt/mongoexp.py
+RUN sed -i 's/rval = self.handle.jobs.find(query).count()/rval = len(list(self.handle.jobs.find(query)))/g' /usr/local/lib/python3.11/dist-packages/hyperopt/mongoexp.py
+# pip install pymongo==3.13.0?
+
 #run container as admin
 USER admin
 

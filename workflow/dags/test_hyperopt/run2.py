@@ -37,20 +37,22 @@ from airflow.utils.task_group import TaskGroup
 from airflow.operators.python import PythonOperator
 from airflow.models import BaseOperator
 from hyperopt import fmin, tpe, Trials, hp, FMinIter
+from hyperopt.mongoexp import MongoTrials
 from hyperopt import atpe
 from hyperopt import Domain
 from hyperopt.early_stop import no_progress_loss
 import pickle
 
 class HyperoptTaskGroup(TaskGroup):
-    def __init__(self, space, algo=atpe.suggest, max_evals=100, min_evals=20, early_stopping=True, params={}, group_id="optimize", *args, **kwargs):
+    def __init__(self, space, algo=atpe.suggest, max_evals=100, min_evals=20, early_stopping=True, params={},
+                 group_id="optimize", mongo_connection='mongo://mongo:27017/hyperopt/jobs', *args, **kwargs):
         self.space = space
         self.algo = algo
         self.max_evals = max_evals
         self.min_evals = min_evals
         self.final_run = False
         
-        self.trials = Trials()
+        
 
         kwargs["ui_color"] = "#4fe51d"
         kwargs["ui_fgcolor"] = "#fff"
@@ -62,33 +64,12 @@ class HyperoptTaskGroup(TaskGroup):
             self.default_args = {}
         self.default_args["params"] = params
         
-        self.save_trials()
-            
-    def save_trials(self):
-        logging.critical("load")
-        file_name = "/tmp/"+self.dag_id+"_"+self.group_id+".pkl"
-        with open(file_name, 'wb') as f:
-            pickle.dump(self.trials, f)
-        print(f"Trials saved to '{file_name}'")
-        logging.critical(self.trials.trials)
+        self.trials = MongoTrials(mongo_connection, exp_key=self.dag_id + "_" + group_id)
         
-    def load_trials(self):
-        logging.critical("load")
-        file_name = "/tmp/"+self.dag_id+"_"+self.group_id+".pkl"
-        try:
-            with open(file_name, 'rb') as f:
-                loaded_trials = pickle.load(f)
-                if isinstance(loaded_trials, Trials):
-                    self.trials = loaded_trials
-                    print(f"Trials loaded from '{file_name}'")
-                else:
-                    print(f"Error: '{file_name}' does not contain Trials object")
-        except FileNotFoundError:
-            print(f"Error: '{file_name}' not found")
-        logging.critical(self.trials._trials)
+           
         
     def get_new_params(self):
-        self.load_trials()
+        
         def _sample(parameters):
             return {"loss": 0.0 , "status": "ok"}
         
@@ -98,10 +79,11 @@ class HyperoptTaskGroup(TaskGroup):
             fmin(
                 algo=self.algo,
                 fn=_sample,
-                max_evals=new_max_evals,
+                max_evals=self.min_evals,
                 space=self.space,
                 trials=self.trials,
-                show_progressbar=False
+                show_progressbar=False,
+                timeout=1
             )
         else:
             fmin(
@@ -111,23 +93,22 @@ class HyperoptTaskGroup(TaskGroup):
                 space=self.space,
                 trials=self.trials,
                 early_stop_fn=no_progress_loss(10, percent_increase=.1),
-                show_progressbar=False
+                show_progressbar=False,
+                timeout=1
             )
         if len(self.trials) == new_max_evals:
             logging.critical(self.trials.trials[-1])
             
             res = self.trials.trials[-1]['misc']['vals']
-            self.save_trials()
             return {k: v[0] if isinstance(v, list) and len(v) == 1 else v for k,v in res.items()}
         else:
             return None
         
     def update_last_loss(self, loss):    
-        self.load_trials()
+        
         logging.critical("fuck")
         logging.critical(self.trials.trials)
         self.trials.trials[-1]['result']['loss'] = loss
-        self.save_trials()
         
     def update_last_loss_error(self):    
         self.trials.trials[-1]['result']['status'] = 'error'        
