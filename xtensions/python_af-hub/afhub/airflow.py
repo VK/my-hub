@@ -85,12 +85,27 @@ def common_write_mail(self, outputFileName):
 
 
 def common_execute(self, context):
+    print(context)
     self.runDate = context['execution_date']
     self.dagName = context['dag'].dag_id
     self.dagfolder = context['dag'].folder
     self.ti = context['ti']
+
     self.dagrun = self.ti.get_dagrun()
     self.parameters["conf"] = json.dumps(self.dagrun.conf)
+    in_tasks = [t.task_id for t in self.ti.task.upstream_list]
+    self.parameters["upstream_returns"] = json.dumps(
+        {t: self.ti.xcom_pull(task_ids=t, key="return_value") for t in in_tasks}
+    )
+    if "params" in context:
+        params = context["params"]
+        if not params:
+            params = {}
+        if "params" in self.parameters and self.parameters["params"]:
+            manual_params = json.loads(self.parameters["params"])
+            if manual_params:
+                params.update(manual_params)
+        self.parameters["params"] = json.dumps(params)
 
     outputFileName = os.path.join(
         "/home/admin/workflow/output", self.dagName, self.runDate.strftime("%Y-%m-%d_%H_%M"), self.outputFile)
