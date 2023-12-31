@@ -1,5 +1,6 @@
 from kubernetes.client import models as k8s
 from . import databricks
+from .hyperopt_group import HyperoptTaskGroup
 from airflow.exceptions import AirflowException
 from airflow.models import BaseOperator, SkipMixin
 from airflow.models.dag import DagContext

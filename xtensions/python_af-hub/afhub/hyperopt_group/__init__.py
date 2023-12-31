@@ -8,6 +8,8 @@ from hyperopt.base import SONify
 from hyperopt.base import JOB_STATE_DONE, JOB_STATE_ERROR, STATUS_OK, STATUS_FAIL
 import time
 import numpy as np
+import os
+
 if not hasattr(np, "warnings"):
     class Dummy:
         def filterwarnings(*args, **kwargs):
@@ -40,9 +42,17 @@ def no_progress_loss(min_evals=20, iteration_stop_count=10, percent_increase=0.0
 
 class HyperoptTaskGroup(TaskGroup):
     def __init__(self, space, algo=atpe.suggest, max_evals=100, min_evals=20, params={},
-                 group_id="optimize", mongo_connection='mongo://mongo:27017/hyperopt/jobs', 
+                 group_id="optimize", mongo_connection=None, 
                  params_in_dagrun=False,
                  *args, **kwargs):
+
+        default_mongo_connection = 'mongo://mongo:27017/hyperopt/jobs'
+        env_variable = 'AIRFLOW__HYPEROPT_MONGO'
+        
+        if not mongo_connection:
+            mongo_connection = os.getenv(env_variable, default_mongo_connection) if os.getenv(env_variable) else default_mongo_connection
+
+
         self.space = space
         self.algo = algo
         self.max_evals = max_evals
@@ -261,7 +271,7 @@ class HyperoptTaskGroup(TaskGroup):
         )              
         
         self.init_task = PythonOperator(
-            task_id="init",
+            task_id="input",
             python_callable=self.init_op,
             trigger_rule="all_success",
             task_group=self,
@@ -273,7 +283,7 @@ class HyperoptTaskGroup(TaskGroup):
         self.reset_task >> self.init_task
         
         self.exit_task = PythonOperator(
-            task_id="exit",
+            task_id="loss",
             python_callable=self.exit_op,
             trigger_rule="all_success",
             task_group=self,
@@ -281,7 +291,7 @@ class HyperoptTaskGroup(TaskGroup):
             provide_context=True,
         )
 
-        for task in self.opti_roots:
+        for task in self.opti_tasks:
             task.set_upstream(self.init_task)
         for task in self.opti_leaves:
             task.set_downstream(self.exit_task)

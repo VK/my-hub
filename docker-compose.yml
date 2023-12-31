@@ -13,6 +13,7 @@ services:
       - "postgres"      
     environment:      
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://airflow:airflow@postgres:5432/hub1
+      - AIRFLOW__HYPEROPT_MONGO=mongo://mongo:27017/testopt/jobs
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock
       - mlflow:/home/admin/mlflow
