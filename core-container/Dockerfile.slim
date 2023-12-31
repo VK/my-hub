@@ -1,0 +1,25 @@
+FROM tensorflow/tensorflow:2.15.0-gpu-jupyter as build
+
+RUN mkdir -p /tmp/setup
+COPY ./core-container /tmp/setup
+COPY ./configurable-http-proxy/lib/configproxy.js /tmp/setup/configproxy.js
+COPY ./xtensions /tmp/setup/xtensions
+COPY ./workflow /tmp/setup/workflow
+RUN cd /tmp && apt -y install zip && zip -9 -r /setup.zip setup
+
+
+
+FROM tensorflow/tensorflow:2.15.0-gpu-jupyter
+
+COPY --from=build /setup.zip /tmp/setup.zip 
+RUN apt -y install zip \
+     && cd /tmp && unzip /tmp/setup.zip && cd /tmp/setup \
+     && chmod 777 setup.sh \
+     && ./setup.sh \
+     && rm -rf /tmp/setup*
+
+USER admin
+WORKDIR /jupyterhub
+EXPOSE 5050 5051 4040 4041
+ENTRYPOINT ["/run.sh"]
+CMD ["start"]

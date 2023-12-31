@@ -5,4 +5,7 @@
 ```
 docker build -t vikru/my-hub  -f  .\core-container\Dockerfile .
 docker build  --no-cache -t vikru/my-hub  -f  .\core-container\Dockerfile .
+
+
+docker build -t vikru/my-hub-slim  -f  .\core-container\Dockerfile.slim .
 ```
