@@ -138,7 +138,8 @@ def extract_result(self, res):
         self.log.info("No celles returned")
         return None
 
-    last_cell_output = [c for c in res["cells"] if len(c["outputs"]) > 0][-1]["outputs"]
+    last_cell_output = [c for c in res["cells"] if "outputs" in c and len(c["outputs"]) > 0][-1]["outputs"]
+    
     if last_cell_output:
         # If the last cell has outputs, extract the result
         last_output = last_cell_output[-1]
