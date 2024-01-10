@@ -129,7 +129,7 @@ def common_execute(self, context):
 def custom_json_decoder(content):
     try:
         return json5.loads(content)
-    except json5.JSONDecodeError:
+    except:
         return content
 
 def extract_result(self, res):
@@ -139,7 +139,7 @@ def extract_result(self, res):
         return None
 
     cell_outputs = [c for c in res["cells"] if "outputs" in c and len(c["outputs"]) > 0]
-    last_cell_output = cell_outputs[-1] if cell_outputs else None
+    last_cell_output = cell_outputs[-1]["outputs"] if cell_outputs else None
     
     if last_cell_output:
         # If the last cell has outputs, extract the result
