@@ -1,5 +1,5 @@
 #FROM tensorflow/tensorflow:2.8.0-jupyter
-FROM tensorflow/tensorflow:2.15.0-gpu-jupyter
+FROM tensorflow/tensorflow:2.16.1-gpu-jupyter
 
 
 #install nodejs
