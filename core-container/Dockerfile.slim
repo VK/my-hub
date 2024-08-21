@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.15.0-gpu-jupyter as build
+FROM tensorflow/tensorflow:2.15.0-gpu-jupyter AS build
 
 RUN mkdir -p /tmp/setup
 COPY ./core-container /tmp/setup

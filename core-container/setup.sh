@@ -5,12 +5,16 @@ apt-get -y update \
     && apt-get install -y --no-install-recommends apt-utils \
     && curl -sL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs iputils-ping ssh nano sshpass \
-    && npm install -g configurable-http-proxy \
+    && npm install -g configurable-http-proxy http-proxy \
     && apt install wget
 
 
 # install updated configurable-http-proxy of jupyterhub
 cp /tmp/setup/configproxy.js /usr/lib/node_modules/configurable-http-proxy/lib/configproxy.js    
+
+
+# install torch
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
 # install python requirements
 pip install Cython && pip install scikit-learn --no-build-isolation

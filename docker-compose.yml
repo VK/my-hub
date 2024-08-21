@@ -5,7 +5,7 @@ services:
   my-hub:
     # image: vikru/my-hub:v2.8.0-rc5
     # image: vikru/my-hub:v2.8.0-rc10
-    image: vikru/my-hub
+    image: vikru/my-hub-slim
     restart: always
     ports:
       - 9950:8000
@@ -14,6 +14,7 @@ services:
     environment:      
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://airflow:airflow@postgres:5432/hub1
       - AIRFLOW__HYPEROPT_MONGO=mongo://mongo:27017/testopt/jobs
+
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock
       - mlflow:/home/admin/mlflow
