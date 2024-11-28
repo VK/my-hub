@@ -29,7 +29,7 @@ jobs:
         echo $TAG
 
     - name: Publish to Registry
-      uses: elgohr/Publish-Docker-Github-Action@master
+      uses: elgohr/Publish-Docker-Github-Action@v5
       with:
         name: vikru/my-hub
         username: ${{ secrets.DOCKER_USERNAME }}
