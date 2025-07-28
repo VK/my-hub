@@ -52,3 +52,4 @@ azure-storage-file-datalake
 azure-identity
 shapely
 lightgbm
+starlette>=0.47.2 # not directly required, pinned by Snyk to avoid a vulnerability
